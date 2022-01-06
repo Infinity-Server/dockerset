@@ -1,0 +1,4 @@
+#!/bin/sh
+
+chmod 777 /dev/dri/*
+/usr/sbin/gosu $PUID:$PGID /jellyfin/jellyfin
