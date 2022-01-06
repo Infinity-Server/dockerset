@@ -41,10 +41,10 @@ COPY start /start
 # Install
 ## UI Components
 COPY fake-deepin-elf-verify /install/fake-deepin-elf-verify
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl libgtk2.0-0 libxss1 libnss3 libasound2 libdbus-glib-1-2 fonts-droid-fallback ttf-wqy-microhei gosu
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y dpkg-dev curl libgtk2.0-0 libxss1 libnss3 libasound2 libdbus-glib-1-2 fonts-droid-fallback ttf-wqy-microhei gosu
 RUN dpkg-deb -b /install/fake-deepin-elf-verify /install/deepin.elf.verify.deb
 RUN apt install -y /install/deepin.elf.verify.deb
-RUN curl -fsSL "https://cdn-package-store6.deepin.com/appstore/pool/appstore/c/com.xunlei.download/com.xunlei.download_${XUNLEI_VERSION}_$([[ "$(uname -a | grep aarch64 | wc -l)" == "1" ]] && echo arm64 || echo amd64).deb" -o /install/com.xunlei.download.deb
+RUN curl -fsSL "https://cdn-package-store6.deepin.com/appstore/pool/appstore/c/com.xunlei.download/com.xunlei.download_${XUNLEI_VERSION}_$(dpkg-architecture -q DEB_BUILD_ARCH).deb" -o /install/com.xunlei.download.deb
 RUN apt install -y /install/com.xunlei.download.deb
 
 # Install
