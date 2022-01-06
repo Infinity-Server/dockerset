@@ -14,7 +14,6 @@ WORKDIR /install
 
 # Install
 ## Base environment
-RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata keyboard-configuration
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install \

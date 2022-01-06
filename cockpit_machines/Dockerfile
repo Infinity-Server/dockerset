@@ -3,7 +3,6 @@ FROM ubuntu:20.04
 # using systemd as init system, and need run with --privileged --interactive --tty and --device /dev/kvm:/dev/kvm
 ENV container=docker
 
-RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y cockpit cockpit-machines \
       qemu qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager && \
