@@ -1,0 +1,4 @@
+[submodule "caddy/caddy"]
+	path = caddy/caddy
+	url = git@github.com:thedadams/caddy.git
+	branch = support-embedded-matchers
