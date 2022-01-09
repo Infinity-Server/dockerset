@@ -34,8 +34,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   cloudflare_ddns:
     runs-on: ubuntu-latest
     steps:
@@ -65,8 +65,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   cockpit_machines:
     runs-on: ubuntu-latest
     steps:
@@ -96,8 +96,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   firefox:
     runs-on: ubuntu-latest
     steps:
@@ -127,8 +127,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   jellyfin:
     runs-on: ubuntu-latest
     steps:
@@ -158,8 +158,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   pi_dashboard:
     runs-on: ubuntu-latest
     steps:
@@ -189,8 +189,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   shell:
     runs-on: ubuntu-latest
     steps:
@@ -220,8 +220,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   ssserver:
     runs-on: ubuntu-latest
     steps:
@@ -251,8 +251,8 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
   xunlei:
     runs-on: ubuntu-latest
     steps:
@@ -282,5 +282,5 @@ jobs:
           file: ${{ github.job }}/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
