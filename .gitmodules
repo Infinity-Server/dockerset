@@ -2,3 +2,6 @@
 	path = caddy/caddy
 	url = git@github.com:thedadams/caddy.git
 	branch = support-embedded-matchers
+[submodule "linux_dash/dash"]
+	path = linux_dash/dash
+	url = git@github.com:afaqurk/linux-dash.git
