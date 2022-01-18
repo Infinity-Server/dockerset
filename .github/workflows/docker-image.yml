@@ -160,6 +160,17 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
+      -
+        name: Build Docker Intel QVS
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: ${{ github.job }}
+          file: ${{ github.job }}/Dockerfile.intel
+          platforms: linux/amd64
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:intel
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache_intel
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache_intel,mode=max
   pi_dashboard:
     runs-on: ubuntu-latest
     steps:
