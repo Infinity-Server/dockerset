@@ -4,6 +4,10 @@ ENV PUID=1001
 ENV PGID=100
 
 COPY init /init
-RUN apt update && apt install gosu -y && apt clean
+COPY ffmpeg.c /usr/lib/jellyfin-ffmpeg/ffmpeg.c
+RUN apt update && apt install gcc gosu -y && apt clean && \
+    mv /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/lib/jellyfin-ffmpeg/ffmpeg.exe && \
+    gcc /usr/lib/jellyfin-ffmpeg/ffmpeg.c -o /usr/lib/jellyfin-ffmpeg/ffmpeg && \
+    chmod u+s /usr/lib/jellyfin-ffmpeg/ffmpeg
 
 ENTRYPOINT ["/init"]
