@@ -6,7 +6,7 @@ RUN apt update && \
     cd OctoPrint-Network-Printing && /usr/local/bin/python setup.py install && cd .. && rm -rvf OctoPrint-Network-Printing
 
 ARG FRP_VERSION=0.38.0
-ADD run /var/run/s6/services/frp/run
+ADD run /etc/services.d/frp/run
 COPY post_setup .
 RUN ./post_setup ${FRP_VERSION}
 
