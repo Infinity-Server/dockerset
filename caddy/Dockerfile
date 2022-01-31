@@ -1,4 +1,4 @@
-FROM golang AS builder
+FROM golang:1.17.6 AS builder
 WORKDIR /go/src
 COPY caddy /go/src/caddy
 WORKDIR /go/src/caddy

@@ -1,4 +1,4 @@
-FROM golang AS builder
+FROM golang:1.17.6 AS builder
 WORKDIR /go/src
 COPY dash/app /go/src/dash
 RUN cd /go/src/dash/server && CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -v index.go
