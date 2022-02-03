@@ -19,6 +19,10 @@ RUN curl -L https://github.com/Infinity-Server/docker_image_set/raw/blob/xunlei_
     cp -rvf /work/ui/index.cgi /var/packages/pan-xunlei-com/target/xunlei-pan-cli-web && \
     mv /var/packages/pan-xunlei-com/target/xunlei-pan-cli-launcher* /var/packages/pan-xunlei-com/target/xunlei-pan-cli-launcher && \
     echo '{"port":5050, "internal": false, "dir":"/downloads"}' > /var/packages/pan-xunlei-com/config.json && \
+    mkdir -p /usr/syno/synoman/webman/modules && \
+    echo '#!/bin/bash' > /usr/syno/synoman/webman/modules/authenticate.cgi && \
+    echo 'echo dosk' >> /usr/syno/synoman/webman/modules/authenticate.cgi && \
+    chmod 755 /usr/syno/synoman/webman/modules/authenticate.cgi && \
     rm -rvf /work
 COPY --from=builder /go/src/xunlei_cgi/xunlei_cgi /var/packages/pan-xunlei-com/xunlei_cgi
 WORKDIR /var/packages/pan-xunlei-com
