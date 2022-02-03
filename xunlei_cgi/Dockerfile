@@ -1,6 +1,6 @@
 FROM golang:1.17.6 AS builder
 WORKDIR /go/src
-COPY src /go/src/xunlei_cgi
+COPY xunlei_cgi /go/src/xunlei_cgi
 WORKDIR /go/src/xunlei_cgi
 RUN go env -w GO111MODULE=on && go env -w GOPROXY=https://goproxy.cn,direct
 RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -v
