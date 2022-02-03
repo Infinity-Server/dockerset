@@ -23,7 +23,10 @@ RUN curl -L https://github.com/Infinity-Server/docker_image_set/raw/blob/xunlei_
     echo '#!/bin/bash' > /usr/syno/synoman/webman/modules/authenticate.cgi && \
     echo 'echo dosk' >> /usr/syno/synoman/webman/modules/authenticate.cgi && \
     chmod 755 /usr/syno/synoman/webman/modules/authenticate.cgi && \
+    mkdir -p /downloads && \
     rm -rvf /work
 COPY --from=builder /go/src/xunlei_cgi/xunlei_cgi /var/packages/pan-xunlei-com/xunlei_cgi
 WORKDIR /var/packages/pan-xunlei-com
+EXPOSE 5050
+VOLUME ["/downloads"]
 ENTRYPOINT ["/var/packages/pan-xunlei-com/xunlei_cgi"]
