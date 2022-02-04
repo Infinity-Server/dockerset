@@ -1,11 +1,22 @@
 #!/bin/bash
 
-if [ ! -f /etc/synoinfo.conf ];
+if [ ! -f /rootfs/etc/synoinfo.conf ];
 then
   rand=$(cat /proc/sys/kernel/random/uuid | awk -F '-' '{print $1}')
-  echo "unique=\"synology_${rand}_720+\"" > /etc/synoinfo.conf
+  echo "unique=\"synology_${rand}_720+\"" > /rootfs/etc/synoinfo.conf
 fi
+rm /rootfs/.dockerenv
 
-rm /.dockerenv
+mount -o bind /dev /rootfs/dev
+mount -o bind /sys /rootfs/sys
+mount -t proc proc /rootfs/proc
+mount -t tmpfs tmpfs /rootfs/tmp
+mount -o bind /downloads /rootfs/downloads
 
-/var/packages/pan-xunlei-com/xunlei_cgi
+chroot /rootfs /var/packages/pan-xunlei-com/xunlei_cgi
+
+umount /rootfs/downloads
+umount /rootfs/proc
+umount /rootfs/tmp
+umount /rootfs/sys
+umount /rootfs/dev
