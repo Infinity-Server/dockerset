@@ -1,5 +1,17 @@
 #!/bin/bash
 
+pid='-1'
+
+do_umount() {
+  kill -9 $pid
+  echo 'Exiting ...'
+  umount /rootfs/downloads
+  umount /rootfs/proc
+  umount /rootfs/tmp
+  umount /rootfs/sys
+  umount /rootfs/dev
+}
+
 if [ ! -f /rootfs/etc/synoinfo.conf ];
 then
   rand=$(cat /proc/sys/kernel/random/uuid | awk -F '-' '{print $1}')
@@ -13,10 +25,12 @@ mount -t proc proc /rootfs/proc
 mount -t tmpfs tmpfs /rootfs/tmp
 mount -o bind /downloads /rootfs/downloads
 
-chroot /rootfs /var/packages/pan-xunlei-com/xunlei_cgi
+chroot /rootfs /var/packages/pan-xunlei-com/xunlei_cgi &
+pid=$(ps -e -o pid,cmd | grep xunlei_cgi | grep -v grep | awk '{print $1}' | xargs)
 
-umount /rootfs/downloads
-umount /rootfs/proc
-umount /rootfs/tmp
-umount /rootfs/sys
-umount /rootfs/dev
+trap 'do_umount' SIGINT
+trap 'do_umount' SIGHUP
+trap 'do_umount' SIGTERM
+
+wait $pid
+do_umount
