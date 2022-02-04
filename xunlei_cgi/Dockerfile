@@ -28,7 +28,8 @@ RUN mkdir -p /rootfs/var/packages/pan-xunlei-com/shares && \
     echo 'echo dosk' >> /rootfs/usr/syno/synoman/webman/modules/authenticate.cgi && \
     chmod 755 /rootfs/usr/syno/synoman/webman/modules/authenticate.cgi && \
     mkdir -p /rootfs/downloads && mkdir -p /downloads && \
-    rm -rvf /work
+    rm -rvf /work && \
+    rm /rootfs/.dockerenv || ls
 COPY --from=builder /go/src/xunlei_cgi/xunlei_cgi /rootfs/var/packages/pan-xunlei-com/xunlei_cgi
 WORKDIR /
 ADD init /init

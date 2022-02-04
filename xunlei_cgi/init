@@ -5,7 +5,7 @@ then
   rand=$(cat /proc/sys/kernel/random/uuid | awk -F '-' '{print $1}')
   echo "unique=\"synology_${rand}_720+\"" > /rootfs/etc/synoinfo.conf
 fi
-rm /rootfs/.dockerenv
+cat /etc/resolv.conf > /rootfs/etc/resolv.conf
 
 mount -o bind /dev /rootfs/dev
 mount -o bind /sys /rootfs/sys
