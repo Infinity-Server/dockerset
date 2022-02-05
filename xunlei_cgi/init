@@ -8,10 +8,11 @@ fi
 cat /etc/resolv.conf > /rootfs/etc/resolv.conf
 echo '{"port":5050, "internal": false, "dir":"/downloads"}' > /rootfs/var/packages/pan-xunlei-com/config.json && \
 
-mount -o bind /dev /rootfs/dev
-mount -o bind /sys /rootfs/sys
-mount -t proc proc /rootfs/proc
-mount -t tmpfs tmpfs /rootfs/tmp
-mount -o bind /downloads /rootfs/downloads
-
-chroot /rootfs /var/packages/pan-xunlei-com/xunlei_cgi
+proot \
+  -b /sys \
+  -b /dev \
+  -b /tmp \
+  -r /rootfs \
+  --kill-on-exit \
+  -b /downloads:/downloads \
+  /var/packages/pan-xunlei-com/xunlei_cgi

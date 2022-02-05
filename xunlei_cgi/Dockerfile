@@ -31,6 +31,7 @@ FROM alpine
 COPY --from=rootfs / /rootfs
 RUN apk update && \
     apk add bash && \
+    apk add proot --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ && \
     mkdir /downloads
 WORKDIR /
 ADD init /init

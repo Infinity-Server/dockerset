@@ -200,12 +200,12 @@ docker run \
 
 ### xunlei_cgi
 
-> 迅雷 Synology DSM7 版本，SYS_ADMIN 如果不好使请换 privileged 模式运行
+> 迅雷 Synology DSM7 版本，需要 SYS_PTRACE 权限，因为用到了 proot
 
 ```bash
 docker run \
   --publish 5050:5050 \
-  --cap-add SYS_ADMIN \
+  --cap-add SYS_PTRACE \
   --volume /downloads:/downloads \
   springhack/xunlei_cgi
 ```
