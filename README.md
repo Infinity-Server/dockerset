@@ -47,6 +47,8 @@ docker run \
 
 ```bash
 docker run \
+  --env PASSWORD=sksks \
+  --env GEOMETRY=1770x920 \
   --publish 5070:5070 \
   springhack/firefox
 ```
