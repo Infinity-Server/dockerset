@@ -184,6 +184,16 @@ docker run \
   springhack/ssserver
 ```
 
+### wait_to_do
+
+> 魔改自 wait-for，用来等待 OpenWrt 启动之后延时启动一些 Docker 服务
+
+```bash
+docker run \
+  --volume /var/run/docker.sock:/var/run/docker.sock \
+  springhack/wait_to_do 10.10.10.10:8000 -t 30 -- docker start xunlei
+```
+
 ### xunlei
 
 > 迅雷的 UOS 版本，Xpra 作为 WebUI
