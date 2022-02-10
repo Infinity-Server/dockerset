@@ -220,6 +220,17 @@ docker run \
   springhack/xunlei_cgi
 ```
 
+### thunder
+
+> xunlei_cgi 的无需权限版本，给二进制打了补丁，绕过签名验证
+
+```bash
+docker run \
+  --publish 5050:5050 \
+  --volume /downloads:/downloads \
+  springhack/thunder
+```
+
 ### zerotier
 
 > 异地组网，深得我心
