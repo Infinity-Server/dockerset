@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# fake synology info
+if [ ! -f /etc/synoinfo.conf ];
+then
+  rand=$(cat /proc/sys/kernel/random/uuid | awk -F '-' '{print $1}')
+  echo "unique=\"synology_${rand}_720+\"" > /etc/synoinfo.conf
+fi
+
+# generate config
+echo '{"port":5050, "internal": false, "dir":"/downloads"}' > /var/packages/pan-xunlei-com/config.json
+
+# rm dockerenv
+rm /.dockerenv
+
+# fix socket path
+mkdir -p /var/packages/pan-xunlei-com/target/var
+ln -s /tmp/go-build/pan-xunlei-com/target/var/pan-xunlei-com.sock /var/packages/pan-xunlei-com/target/var/pan-xunlei-com.sock
+
+# move to tmp
+mkdir -p /tmp/go-build
+cp -rvf /var/packages/pan-xunlei-com /tmp/go-build/pan-xunlei-com
+
+# path binaries
+sed -i 's/mounts/status/' /tmp/go-build/pan-xunlei-com/target/xunlei-pan-cli*
+
+# run
+/tmp/go-build/pan-xunlei-com/xunlei_cgi
