@@ -11,11 +11,16 @@ fi
 echo '{"port":5050, "internal": false, "dir":"/downloads"}' > /var/packages/pan-xunlei-com/config.json
 
 # rm dockerenv
-rm /.dockerenv
+rm /.dockerenv 2>/dev/null
 
 # fix socket path
 mkdir -p /var/packages/pan-xunlei-com/target/var
-ln -s /tmp/go-build/pan-xunlei-com/target/var/pan-xunlei-com.sock /var/packages/pan-xunlei-com/target/var/pan-xunlei-com.sock
+ln -s \
+  /tmp/go-build/pan-xunlei-com/target/var/pan-xunlei-com.sock \
+  /var/packages/pan-xunlei-com/target/var/pan-xunlei-com.sock 2>/dev/null
+ln -s \
+  /tmp/go-build/pan-xunlei-com/target/var/pan-xunlei-com-launcher.sock \
+  /var/packages/pan-xunlei-com/target/var/pan-xunlei-com-launcher.sock 2>/dev/null
 
 # move to tmp
 mkdir -p /tmp/go-build
