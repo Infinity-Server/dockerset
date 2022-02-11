@@ -26,6 +26,13 @@ RUN mkdir -p /var/packages/pan-xunlei-com/shares && \
     mkdir -p /downloads && \
     rm -rvf /work
 COPY --from=builder /go/src/xunlei_cgi/xunlei_cgi /var/packages/pan-xunlei-com/xunlei_cgi
+
+FROM alpine
+COPY --from=rootfs /var/packages/pan-xunlei-com /var/packages/pan-xunlei-com
+COPY --from=rootfs /usr/syno/synoman/webman/modules/authenticate.cgi /usr/syno/synoman/webman/modules/authenticate.cgi
+RUN apk add gcompat boost bash && \
+    mkdir -p /downloads
+
 WORKDIR /
 ADD init /init
 EXPOSE 5050
