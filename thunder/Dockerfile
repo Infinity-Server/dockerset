@@ -12,7 +12,7 @@ WORKDIR /work
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install curl git xz-utils dpkg-dev
 RUN mkdir -p /var/packages/pan-xunlei-com/shares && \
-    mkdir -p /var/packages/pan-xunlei-com/target && \
+    mkdir -p /var/packages/pan-xunlei-com/target/var && \
     curl -L https://github.com/Infinity-Server/docker_image_set/raw/blob/xunlei_cgi/v${VERSION}-DSM7.x-$(dpkg-architecture -q DEB_BUILD_ARCH).spk --output /work/xunlei.spk && \
     tar -xvf xunlei.spk && \
     tar -xvf package.tgz && \
@@ -23,12 +23,11 @@ RUN mkdir -p /var/packages/pan-xunlei-com/shares && \
     echo '#!/bin/bash' > /usr/syno/synoman/webman/modules/authenticate.cgi && \
     echo 'echo dosk' >> /usr/syno/synoman/webman/modules/authenticate.cgi && \
     chmod 755 /usr/syno/synoman/webman/modules/authenticate.cgi && \
-    mkdir -p /downloads && \
     rm -rvf /work
 COPY --from=builder /go/src/xunlei_cgi/xunlei_cgi /var/packages/pan-xunlei-com/xunlei_cgi
 
 FROM alpine
-COPY --from=rootfs /var/packages/pan-xunlei-com /var/packages/pan-xunlei-com
+COPY --from=rootfs /var/packages/pan-xunlei-com /root/pan-xunlei-com
 COPY --from=rootfs /usr/syno/synoman/webman/modules/authenticate.cgi /usr/syno/synoman/webman/modules/authenticate.cgi
 RUN apk add gcompat boost bash && \
     mkdir -p /downloads
