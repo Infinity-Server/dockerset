@@ -29,7 +29,7 @@ COPY --from=builder /go/src/xunlei_cgi/xunlei_cgi /var/packages/pan-xunlei-com/x
 FROM alpine
 COPY --from=rootfs /var/packages/pan-xunlei-com /root/pan-xunlei-com
 COPY --from=rootfs /usr/syno/synoman/webman/modules/authenticate.cgi /usr/syno/synoman/webman/modules/authenticate.cgi
-RUN apk add gcompat boost bash && \
+RUN apk add gcompat boost bash perl && \
     mkdir -p /downloads
 
 WORKDIR /
