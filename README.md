@@ -116,6 +116,17 @@ docker run \
   springhack/owapp
 ```
 
+### owncloud
+
+> 增加了 PUID/PGID 支持，首次启动因为修改权限会很慢
+
+```bash
+docker run \
+  --publish 8080:8080 \
+  --volume /mnt/data:/mnt/data \
+  springhack/owncloud
+```
+
 ### pi_dashboard
 
 > 在用的简单监控面板，够用
