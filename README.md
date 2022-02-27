@@ -246,11 +246,22 @@ docker run \
 
 > 异地组网，深得我心
 
+> 注：试验性，在群晖 DSM7 上默认不载入 tun.ko，zerotier 官方建议开机启动脚本，但是我做了个试验性的自动加载，未测试!
+
 ```bash
 docker run \
   --network host \
   --cap-add NET_ADMIN \
+  --cap-add SYS_ADMIN \
   --device /dev/net/tun:/dev/net/tun \
   --volume /var/lib/zerotier-one:/var/lib/zerotier-one \
+  springhack/zerotier
+docker run \
+  --network host \
+  --cap-add NET_ADMIN \
+  --cap-add SYS_ADMIN \
+  --cap-add SYS_MODULE \
+  --volume /lib/modules/tun.ko:/lib/modules/tun.ko \
+  --volume /var/lib/zerotier-one:/var/lib/zerotier-one \
+  springhack/zerotier
 ```
-
