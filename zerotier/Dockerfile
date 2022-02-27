@@ -32,6 +32,6 @@ RUN apk add --no-cache --purge --clean-protected --update libc6-compat libstdc++
 
 EXPOSE 9993/udp
 
-ENTRYPOINT ["zerotier-one"]
-
+COPY init /init
+ENTRYPOINT ["/init"]
 CMD ["-U"]
