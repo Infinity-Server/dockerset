@@ -66,6 +66,16 @@ docker run \
   pringhack/frp frps -c /frp/frps.ini
 ```
 
+### huproxy
+
+> 配合 caddy 隐藏 ssh 服务
+
+```bash
+docker run \
+  --publish 127.0.0.1:8086:8086 \
+  springhack/huproxy huproxy -listen 0.0.0.0:8086
+```
+
 ### jellyfin
 
 > 魔改自官方 jellyfin/jellyfin 镜像所以原版的参数也可用，增加了 PUID/PGID 支持和 Intel QVS 支持
