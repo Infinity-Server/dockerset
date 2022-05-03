@@ -275,3 +275,20 @@ docker run \
   --volume /var/lib/zerotier-one:/var/lib/zerotier-one \
   springhack/zerotier
 ```
+
+### k3s
+
+> 把数据存储在一个 img 文件里
+
+```bash
+docker run \
+  --pid host \
+  --privileged \
+  --network host \
+  --env K3S_URL=https://10.10.10.10:6443 \
+  --env K3S_TOKEN=XXXXXXXXXXXXXXXXXXXXXX \
+  --volume /host/k3s.img:/dev/k3s \
+  --volume /lib/modules:/lib/modules \
+  --volume /sys/fs/cgroup:/sys/fs/cgroup \
+  springhack/k3s
+```
