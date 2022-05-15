@@ -292,3 +292,13 @@ docker run \
   --volume /sys/fs/cgroup:/sys/fs/cgroup \
   springhack/k3s
 ```
+
+### awake
+
+> 用来局域网开机
+
+```bash
+docker run \
+  --network host \
+  springhack/awake 00:00:00:00:00:00
+```
