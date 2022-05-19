@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# for nfs
+/sbin/rpcbind
+
+# block image file storage
 if [ -f /dev/k3s ];
 then
   mount /dev/k3s /host
@@ -15,4 +19,5 @@ then
   mount -o bind /host/var/log              /var/log
 fi
 
+# start k3s
 exec /bin/k3s $@

@@ -9,7 +9,7 @@ RUN mkdir -p /var/lib/rancher/k3s && \
     mkdir -p /etc/rancher && \
     mkdir -p /host && \
     chmod 1777 /tmp && \
-    apk add jq curl bash cifs-utils util-linux && \
+    apk add jq curl bash cifs-utils util-linux nfs-utils && \
     curl -fsSL https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s -o /bin/k3s && \
     chmod 755 /bin/k3s && \
     ln -s /bin/k3s /bin/kubectl && \
