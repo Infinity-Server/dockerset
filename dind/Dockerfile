@@ -5,5 +5,5 @@ RUN sed -i 's/#!\/bin\/sh/#!\/bin\/sh\n\nsource \/etc\/dind.env/g' /usr/local/bi
 FROM scratch
 COPY --from=rootfs / /
 EXPOSE 2375 2376
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["dockerd-entrypoint.sh"]
 CMD []
