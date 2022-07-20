@@ -35,5 +35,5 @@ done
 
 ip addr add 192.168.123.123/24 dev vec0
 
-screen -d -m socat TCP-LISTEN:12345,fork,reuseaddr EXEC:/bin/bash
+/etc/init.d/ssh start
 exec /usr/bin/tini /bin/sleep infinity

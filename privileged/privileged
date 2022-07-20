@@ -52,4 +52,4 @@ then
   wait_ssh
 fi
 
-socat - TCP:192.168.123.123:12345
+ssh -q root@192.168.123.123
