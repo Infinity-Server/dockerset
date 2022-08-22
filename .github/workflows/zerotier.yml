@@ -32,6 +32,10 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
+          build-args: >
+            ALPINE_VERSION=edge
+            ZT_COMMIT=651f45fe29155c462f4e56dd74f4a347f6861d0d
+            ZT_VERSION=1.10.1
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:

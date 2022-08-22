@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.16.2
 
 ENV API_TOKEN='ksfbdjanujfbkbajbsfgkbcal'
 ENV API_TARGET_DOMAIN_4='test.dosk.win'

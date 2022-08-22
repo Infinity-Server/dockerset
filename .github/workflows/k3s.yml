@@ -33,7 +33,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
           build-args: >
-            K3S_VERSION=v1.24.2+k3s2
+            K3S_VERSION=v1.24.3+k3s1
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:

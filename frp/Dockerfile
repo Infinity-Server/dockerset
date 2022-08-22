@@ -8,7 +8,7 @@ ADD build_env /build_env
 RUN /build_env ${VERSION}
 
 
-FROM alpine
+FROM alpine:3.16.2
 
 COPY --from=builder /frp /frp
 RUN apk --no-cache add ca-certificates && \

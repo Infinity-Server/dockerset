@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.16.2
 
 ARG BROOK_VERSION=v20220707
 
