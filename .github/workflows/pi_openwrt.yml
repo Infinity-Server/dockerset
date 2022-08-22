@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/pi_openwrt.yml
       - pi_openwrt/**
 jobs:
   pi_openwrt:

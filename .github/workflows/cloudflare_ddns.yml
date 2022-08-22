@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/cloudflare_ddns.yml
       - cloudflare_ddns/**
 jobs:
   cloudflare_ddns:

@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/cockpit_machines.yml
       - cockpit_machines/**
 jobs:
   cockpit_machines:

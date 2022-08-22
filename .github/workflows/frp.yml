@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/frp.yml
       - frp/**
 jobs:
   frp:

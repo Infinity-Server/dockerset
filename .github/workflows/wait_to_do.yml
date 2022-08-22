@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/wait_to_do.yml
       - wait_to_do/**
 jobs:
   wait_to_do:

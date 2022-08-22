@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/octoprint.yml
       - octoprint/**
 jobs:
   octoprint:

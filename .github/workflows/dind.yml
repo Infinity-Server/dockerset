@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/dind.yml
       - dind/**
 jobs:
   dind:

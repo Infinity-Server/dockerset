@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/ssserver.yml
       - ssserver/**
 jobs:
   ssserver:

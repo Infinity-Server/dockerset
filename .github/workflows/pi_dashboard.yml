@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/pi_dashboard.yml
       - pi_dashboard/**
 jobs:
   pi_dashboard:

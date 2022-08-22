@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/xunlei_cgi.yml
       - xunlei_cgi/**
 jobs:
   xunlei_cgi:

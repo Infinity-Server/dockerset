@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/linux_dash.yml
       - linux_dash/**
 jobs:
   linux_dash:
