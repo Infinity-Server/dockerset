@@ -1,4 +1,4 @@
-### infinity server dockerset helm repo
+### infinity server helm repo
 
 > [Helm](https://helm.sh) must be installed to use the charts.  Please refer to
 
@@ -7,7 +7,7 @@
 - Once Helm has been set up correctly, add the repo as follows:
 
 ```shell
-helm repo add dosk https://infinity-server.github.io/dockerset
+helm repo add infinity-server https://infinity-server.github.io/dockerset
 helm repo update
 ```
 
