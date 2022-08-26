@@ -13,13 +13,13 @@ EOF
 
 hooks::on_startup() {
   node /utils/config-generator.js
-  screen -d -m /frp/frpc -c /frp/frpc.ini
+  screen -d -m /utils/keepalive /frp/frpc -c /frp/frpc.ini
 }
 
 hooks::on_event() {
   node /utils/config-generator.js
-  pkill frpc
-  screen -d -m /frp/frpc -c /frp/frpc.ini
+  pkill screen
+  screen -d -m /utils/keepalive /frp/frpc -c /frp/frpc.ini
 }
 
 hooks::main() {
@@ -28,9 +28,9 @@ hooks::main() {
     hooks::on_config
   else
     [[ "$(jq -r '.[0].binding' ${BINDING_CONTEXT_PATH})" == "onStartup" ]] \
-      && hooks::on_startup
+      && hooks::on_startup || echo ''
     [[ "$(jq -r '.[0].type' ${BINDING_CONTEXT_PATH})" == "Event" ]] \
-      && hooks::on_event
+      && hooks::on_event || echo ''
   fi
 }
 

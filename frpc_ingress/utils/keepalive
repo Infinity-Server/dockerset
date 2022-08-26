@@ -1,0 +1,9 @@
+#!/bin/bash
+
+while [ 0 ];
+do
+  echo '[KEEPALIVE] (Re)starting job ...'
+  $@
+  echo '[KEEPALIVE] Job dead, wait for 5s ...'
+  sleep 5
+done
