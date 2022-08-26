@@ -5,7 +5,7 @@ if [[ $1 == "--config" ]] ; then
 configVersion: v1
 onStartup: 0
 kubernetes:
-  - apiVersion: dosk.host/v1alpha1
+  - apiVersion: crds.dosk.host/v1alpha1
     kind: FRPCIngress
     executeHookOnEvent: ["Added","Modified","Deleted"]
 EOF
