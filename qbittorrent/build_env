@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-VERSION=$1
-RELEASE_URL=https://api.github.com/repos/WDaan/VueTorrent/releases/tags/v$VERSION
-USER_AGENT='Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36'
-DOWNLOAD_URL="$(curl -fsSL -H "user-agent: $USER_AGENT" "$RELEASE_URL" | jq -r '.assets[].browser_download_url' | grep "vuetorrent.zip")"
-
-curl -L "$DOWNLOAD_URL" --output vuetorrent.zip
-unzip vuetorrent.zip

@@ -1,9 +1,0 @@
-#!/bin/bash
-
-cd /home/dosk
-groupmod -g $PGID users
-usermod -u $PUID dosk
-chown -R $PUID:$PGID downloads
-gosu $PUID:$PGID xpra start --html=on --bind-tcp=0.0.0.0:7010,auth=env --notifications=no --resize-display=1920x900 --start=/start
-
-gosu $PUID:$PGID tail -f /dev/null

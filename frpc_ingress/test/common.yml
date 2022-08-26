@@ -1,9 +1,0 @@
-apiVersion: dosk.host/v1alpha1
-kind: FRPCIngress
-metadata:
-  name: common
-spec:
-  kind: Config
-  config:
-    - server_addr = 45.82.78.17
-    - server_port = 7000

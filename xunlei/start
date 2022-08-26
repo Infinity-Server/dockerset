@@ -1,5 +1,0 @@
-#!/bin/bash
-
-/opt/apps/com.xunlei.download/files/start.sh
-xpra stop
-pkill tail

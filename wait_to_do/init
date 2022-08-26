@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo '[BEGIN] Waiting to do ...'
-/work/wait-for "$@"
-
-echo '[DONE] Sleep infinity ...'
-exec sleep infinity

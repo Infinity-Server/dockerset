@@ -1,8 +1,0 @@
-#!/bin/bash
-
-while [ 0 ];
-do
-  /cloudflare_ddns
-  echo Waiting for next tick ...
-  sleep $TIMER_INTERVAL
-done
