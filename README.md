@@ -14,7 +14,7 @@ helm repo update
 - To install one chart, eg: `frpc-ingress`:
 
 ```shell
-helm upgrade --install frpc-ingress dosk/frpc-ingress 
+helm upgrade --install frpc-ingress infinity-server/frpc-ingress 
 ```
 
 - To uninstall the chart:
