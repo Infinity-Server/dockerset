@@ -1,6 +1,6 @@
 apiVersion: v2
-version: 0.1.2
-appVersion: 0.1.2
+version: 0.2.0
+appVersion: 0.2.0
 name: frpc-ingress
 type: application
 description: Frp client ingress define and opertator
