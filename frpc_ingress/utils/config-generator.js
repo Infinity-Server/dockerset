@@ -47,10 +47,14 @@ watch.getOnce(
               console.error('[ERROR] empty rule ...');
               process.exit();
             }
+            const type = item.spec.service.protocol ?
+                item.spec.service.protocol.toLowerCase() :
+                'tcp';
             const extraConfig = item.spec.service.extraConfig || [];
             const svcName = item.spec.service.name || 'default';
             const svcNamespace = item.spec.service.namespace || 'default';
             frpcConfig.set(frpcSection, [
+              `type = ${type}`,
               `local_ip = ${svcName}.${svcNamespace}.svc.cluster.local`,
               `local_port = ${item.spec.service.port}`,
               `remote_port = ${item.spec.service.remotePort}`, ...extraConfig

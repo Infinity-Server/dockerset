@@ -44,6 +44,11 @@ spec:
                       type: integer
                     remotePort:
                       type: integer
+                    protocol:
+                      type: string
+                      enum:
+                        - TCP
+                        - UDP
                     extraConfig:
                       type: array
                       items:

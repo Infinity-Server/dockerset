@@ -1,4 +1,12 @@
 apiVersion: v2
-version: 0.1.1
+version: 0.1.2
+appVersion: 0.1.2
 name: frpc-ingress
+type: application
 description: Frp client ingress define and opertator
+sources:
+  - https://github.com/Infinity-Server/dockerset
+maintainers:
+  - name: springhack
+    email: springhack@live.cn
+    url: https://www.dosk.win/
