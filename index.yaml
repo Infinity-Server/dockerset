@@ -2,6 +2,22 @@ apiVersion: v1
 entries:
   frpc-ingress:
   - apiVersion: v2
+    appVersion: 0.2.2
+    created: "2022-08-30T08:35:57.982923781Z"
+    description: Frp client ingress define and opertator
+    digest: ec0b38ec2a429efa661e3d7e1bd7b963fa5d8c85b871476d93ecb4b142078e08
+    maintainers:
+    - email: springhack@live.cn
+      name: springhack
+      url: https://www.dosk.win/
+    name: frpc-ingress
+    sources:
+    - https://github.com/Infinity-Server/dockerset
+    type: application
+    urls:
+    - https://github.com/Infinity-Server/dockerset/releases/download/frpc-ingress-0.2.2/frpc-ingress-0.2.2.tgz
+    version: 0.2.2
+  - apiVersion: v2
     appVersion: 0.2.1
     created: "2022-08-30T07:29:06.508734554Z"
     description: Frp client ingress define and opertator
@@ -33,4 +49,4 @@ entries:
     urls:
     - https://github.com/Infinity-Server/dockerset/releases/download/frpc-ingress-0.2.0/frpc-ingress-0.2.0.tgz
     version: 0.2.0
-generated: "2022-08-30T07:29:06.508741854Z"
+generated: "2022-08-30T08:35:57.982941881Z"
