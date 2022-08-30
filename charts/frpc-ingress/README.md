@@ -4,7 +4,7 @@
 
 ### Usage
 
-> Server :setup frps on any server in anyway as your wish, eg:
+- Server: setup frps on any server in anyway as your wish, eg:
 
 ```ini
 [common]
@@ -12,9 +12,9 @@ bind_port = 7000
 token = 12345678
 ```
 
-> Client(Kubernetes)
+- Client(Kubernetes)
 
-- Install
+> Install
 
 ```shell
 helm repo add infinity-server https://infinity-server.github.io/dockerset
@@ -22,11 +22,11 @@ helm repo update
 helm upgrade --install frpc-ingress infinity-server/frpc-ingress 
 ```
 
-- Deploy
+> Deploy
 
-  - common config
 
 ```yaml
+# common config
 ---
 apiVersion: crds.dosk.host/v1alpha1
 kind: FRPCIngress
@@ -40,9 +40,8 @@ spec:
     - token = 12345678          # some other configs you need
 ```
 
-  - rule example, a service is required
-
 ```yaml
+# rule example, a service is required
 ---
 apiVersion: v1
 kind: Service
