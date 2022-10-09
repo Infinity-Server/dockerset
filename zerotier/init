@@ -8,4 +8,4 @@ then
   chmod 600 /dev/net/tun
 fi
 
-exec zerotier-one $@
+exec /usr/sbin/zerotier-one $@
