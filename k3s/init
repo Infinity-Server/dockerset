@@ -6,17 +6,22 @@
 # block image file storage
 if [ -f /dev/k3s ];
 then
-  mount /dev/k3s /host
-  mkdir -p /host/etc/rancher
-  mkdir -p /host/var/lib/rancher/k3s
-  mkdir -p /host/var/lib/kubelet
-  mkdir -p /host/var/lib/cni
-  mkdir -p /host/var/log
-  mount -o bind /host/etc/rancher          /etc/rancher
-  mount -o bind /host/var/lib/rancher/k3s  /var/lib/rancher/k3s
-  mount -o bind /host/var/lib/kubelet      /var/lib/kubelet
-  mount -o bind /host/var/lib/cni          /var/lib/cni
-  mount -o bind /host/var/log              /var/log
+  mkdir -p /data
+  mount /dev/k3s /data
+fi
+
+if [ -d /data ];
+then
+  mkdir -p /data/etc/rancher
+  mkdir -p /data/var/lib/rancher/k3s
+  mkdir -p /data/var/lib/kubelet
+  mkdir -p /data/var/lib/cni
+  mkdir -p /data/var/log
+  mount -o bind /data/etc/rancher          /etc/rancher
+  mount -o bind /data/var/lib/rancher/k3s  /var/lib/rancher/k3s
+  mount -o bind /data/var/lib/kubelet      /var/lib/kubelet
+  mount -o bind /data/var/lib/cni          /var/lib/cni
+  mount -o bind /data/var/log              /var/log
 fi
 
 # start k3s

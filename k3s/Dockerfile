@@ -7,7 +7,6 @@ RUN mkdir -p /var/lib/rancher/k3s && \
     mkdir -p /var/lib/cni && \
     mkdir -p /var/log && \
     mkdir -p /etc/rancher && \
-    mkdir -p /host && \
     chmod 1777 /tmp && \
     apk add jq curl bash cifs-utils util-linux nfs-utils && \
     curl -fsSL https://github.com/k3s-io/k3s/releases/download/${K3S_VERSION}/k3s -o /bin/k3s && \
