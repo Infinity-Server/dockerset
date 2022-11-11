@@ -2,6 +2,7 @@
 
 echo '__________________________ acme.sh environments __________________________'
 export HOME=/root
+export DEBUG=3
 cd /root
 export
 
