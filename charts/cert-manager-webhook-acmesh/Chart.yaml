@@ -1,0 +1,8 @@
+apiVersion: v2
+appVersion: 1.2.0
+description: cert-manager webhook solver for acmesh
+name: cert-manager-webhook-acmesh
+version: 1.2.2
+type: application
+maintainers:
+- name: springhack

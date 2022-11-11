@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo '__________________________ acme.sh environments __________________________'
+export HOME=/root
+cd /root
+export
+
+dosk_dnsapi="$1"
+dosk_action="$2"
+dosk_fulldomain="$3"
+dosk_txtvalue="$4"
+
+echo '__________________________ acme.sh delegate __________________________'
+source /root/.acme.sh/acme.sh --info
+source /root/.acme.sh/dnsapi/${dosk_dnsapi}.sh
+${dosk_dnsapi}_${dosk_action} "$dosk_fulldomain" "$dosk_txtvalue"
+echo '__________________________ acme.sh finish __________________________'

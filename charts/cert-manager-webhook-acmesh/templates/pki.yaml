@@ -1,0 +1,114 @@
+---
+# Create a selfsigned Issuer, in order to create a root CA certificate for
+# signing webhook serving certificates
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "acmesh-webhook.selfSignedIssuer" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selfSigned: {}
+
+---
+
+# Generate a CA Certificate used to sign certificates for the webhook
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "acmesh-webhook.rootCACertificate" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  secretName: {{ include "acmesh-webhook.rootCACertificate" . }}
+  duration: 43800h # 5y
+  issuerRef:
+    name: {{ include "acmesh-webhook.selfSignedIssuer" . }}
+  commonName: "ca.acmesh-webhook.cert-manager"
+  isCA: true
+
+---
+
+# Create an Issuer that uses the above generated CA certificate to issue certs
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "acmesh-webhook.rootCAIssuer" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ca:
+    secretName: {{ include "acmesh-webhook.rootCACertificate" . }}
+
+---
+
+# Finally, generate a serving certificate for the webhook to use
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "acmesh-webhook.servingCertificate" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  secretName: {{ include "acmesh-webhook.servingCertificate" . }}
+  duration: 8760h # 1y
+  issuerRef:
+    name: {{ include "acmesh-webhook.rootCAIssuer" . }}
+  dnsNames:
+  - {{ include "acmesh-webhook.fullname" . }}
+  - {{ include "acmesh-webhook.fullname" . }}.{{ .Release.Namespace }}
+  - {{ include "acmesh-webhook.fullname" . }}.{{ .Release.Namespace }}.svc
+
+{{- if .Values.clusterIssuer.enabled }}
+---
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ include "acmesh-webhook.clusterIssuer" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  acme:
+    {{- if .Values.clusterIssuer.staging }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    {{- else }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    {{- end }}
+    email: {{ .Values.clusterIssuer.email }}
+    privateKeySecretRef:
+      name: {{ include "acmesh-webhook.fullname" . }}-letsencrypt
+    solvers:
+    - dns01:
+        webhook:
+          groupName: {{ .Values.groupName }}
+          solverName: acmesh
+          config:
+            ttl: {{ .Values.clusterIssuer.ttl }}
+            dnsapi: {{ required ".Values.clusterIssuer.dnsapi is required" .Values.clusterIssuer.dnsapi }}
+            env: {{ toYaml .Values.clusterIssuer.env | indent 14 }}
+      {{- if .Values.clusterIssuer.selector }}
+      selector: {{ toYaml .Values.clusterIssuer.selector | nindent 8 }}
+      {{- end }}
+{{- end }}
+
