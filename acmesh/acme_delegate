@@ -1,0 +1,11 @@
+#!/bin/bash
+
+dosk_dnsapi="$1"
+dosk_action="$2"
+dosk_fulldomain="$3"
+dosk_txtvalue="$4"
+
+source /root/.acme.sh/acme.sh --info
+source /root/.acme.sh/dnsapi/${dosk_dnsapi}.sh
+
+${dosk_dnsapi}_${dosk_action} "$dosk_fulldomain" "$dosk_txtvalue"
