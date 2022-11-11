@@ -1,5 +1,18 @@
 apiVersion: v1
 entries:
+  cert-manager-webhook-acmesh:
+  - apiVersion: v2
+    appVersion: 1.2.0
+    created: "2022-11-11T07:18:54.81104818Z"
+    description: cert-manager webhook solver for acmesh
+    digest: 1beff87164df5399c0ac2f96b59b54e1217dfa23d34f2422effac0ac274dc36c
+    maintainers:
+    - name: springhack
+    name: cert-manager-webhook-acmesh
+    type: application
+    urls:
+    - https://github.com/Infinity-Server/dockerset/releases/download/cert-manager-webhook-acmesh-1.2.0/cert-manager-webhook-acmesh-1.2.0.tgz
+    version: 1.2.0
   frpc-ingress:
   - apiVersion: v2
     appVersion: 0.2.2
@@ -49,4 +62,4 @@ entries:
     urls:
     - https://github.com/Infinity-Server/dockerset/releases/download/frpc-ingress-0.2.0/frpc-ingress-0.2.0.tgz
     version: 0.2.0
-generated: "2022-08-30T08:35:57.982941881Z"
+generated: "2022-11-11T07:18:54.81105738Z"
