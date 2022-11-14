@@ -107,9 +107,9 @@ spec:
             ttl: {{ .Values.clusterIssuer.ttl }}
             dnsapi: {{ required ".Values.clusterIssuer.dnsapi is required" .Values.clusterIssuer.dnsapi }}
             env:
-              {{- range .Values.clusterIssuer.env}}
-                - {{ . }}
-              {{- end}}
+            {{- range .Values.clusterIssuer.env}}
+              - {{ . }}
+            {{- end}}
       {{- if .Values.clusterIssuer.selector }}
       selector: {{ toYaml .Values.clusterIssuer.selector | nindent 8 }}
       {{- end }}
