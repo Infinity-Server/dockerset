@@ -127,3 +127,41 @@ subjects:
   kind: ServiceAccount
   name: {{ include "acmesh-webhook.fullname" . }}
   namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "acmesh-webhook.fullname" . }}:flowcontrol-solver
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups:
+  - "flowcontrol.apiserver.k8s.io"
+  resources:
+  - "prioritylevelconfigurations"
+  - "flowschemas"
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "acmesh-webhook.fullname" . }}:flowcontrol-solver
+  labels:
+    app: {{ include "acmesh-webhook.name" . }}
+    chart: {{ include "acmesh-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "acmesh-webhook.fullname" . }}:flowcontrol-solver
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: {{ include "acmesh-webhook.fullname" . }}
+  namespace: {{ .Release.Namespace }}

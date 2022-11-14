@@ -106,10 +106,9 @@ spec:
           config:
             ttl: {{ .Values.clusterIssuer.ttl }}
             dnsapi: {{ required ".Values.clusterIssuer.dnsapi is required" .Values.clusterIssuer.dnsapi }}
-            env:
-              {{- range .Values.clusterIssuer.env}}
-                - {{ . }}
-              {{- end}}
+            envSecretRef:
+              name: {{ include "acmesh-webhook.fullname" . }}-secret
+              namespace: {{ .Values.certManager.namespace }}
       {{- if .Values.clusterIssuer.selector }}
       selector: {{ toYaml .Values.clusterIssuer.selector | nindent 8 }}
       {{- end }}
