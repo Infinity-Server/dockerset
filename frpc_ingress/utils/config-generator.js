@@ -53,11 +53,23 @@ watch.getOnce(
             const extraConfig = item.spec.service.extraConfig || [];
             const svcName = item.spec.service.name || 'default';
             const svcNamespace = item.spec.service.namespace || 'default';
-            frpcConfig.set(frpcSection, [
+            const configSection = [
               `type = ${type}`,
               `local_ip = ${svcName}.${svcNamespace}.svc.cluster.local`,
               `local_port = ${item.spec.service.port}`,
-              `remote_port = ${item.spec.service.remotePort}`, ...extraConfig
+            ];
+            if (item.spec.service.remotePort) {
+              configSection.push(`remote_port = ${item.spec.service.remotePort}`)
+            }
+            if (item.spec.service.customDomains) {
+              configSection.push(`custom_domains = ${item.spec.service.customDomains}`)
+            }
+            if (item.spec.service.subdomain) {
+              configSection.push(`subdomain = ${item.spec.service.subdomain}`)
+            }
+            frpcConfig.set(frpcSection, [
+              ...configSection,
+              ...extraConfig
             ]);
             break;
           }

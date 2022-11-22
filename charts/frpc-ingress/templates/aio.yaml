@@ -34,7 +34,6 @@ spec:
                   required:
                     - name
                     - port
-                    - remotePort
                   properties:
                     namespace:
                       type: string
@@ -44,11 +43,17 @@ spec:
                       type: integer
                     remotePort:
                       type: integer
+                    customDomains:
+                      type: string
+                    subdomain:
+                      type: string
                     protocol:
                       type: string
                       enum:
                         - TCP
                         - UDP
+                        - HTTP
+                        - HTTPS
                     extraConfig:
                       type: array
                       items:
