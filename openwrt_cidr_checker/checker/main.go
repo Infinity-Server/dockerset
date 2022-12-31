@@ -4,10 +4,12 @@ import (
   "os"
   "fmt"
   "net"
+  "net/url"
   "strconv"
+  "strings"
   "net/http"
+  "io/ioutil"
   "encoding/json"
-  curl "github.com/andelf/go-curl"
   iprange "github.com/netdata/go.d.plugin/pkg/iprange"
 )
 
@@ -31,69 +33,58 @@ const (
   AccessDeniedErrMsg  = "Access denied"
 )
 
-type AuthRequest struct {
-  Id        int       `json:"id,omitempty"`
-  Method    string    `json:"method,omitempty"`
-  Params    []string  `json:"params,omitempty"`
+func encodeURIComponent(str string) string {
+  r := url.QueryEscape(str)
+  r = strings.Replace(r, "+", "%20", -1)
+  return r
 }
 
-type AuthResponse struct {
-  Id        int       `json:"id,omitempty"`
-  Result    string    `json:"result,omitempty"`
-  Error     string    `json:"error,omitempty"`
-}
-
-func doFetch(api string, method string, data string) ([]byte, error) {
-  easy := curl.EasyInit()
-  defer easy.Cleanup()
-
-  easy.Setopt(curl.OPT_URL, OPENWRT_HOST + api)
-  easy.Setopt(curl.OPT_CUSTOMREQUEST, method)
-  easy.Setopt(curl.OPT_FOLLOWLOCATION, 1);
-  easy.Setopt(curl.OPT_DEFAULT_PROTOCOL, "http");
-  easy.Setopt(curl.OPT_HTTPHEADER, []string{
-    "Content-Type: application/json",
-  })
-
-  easy.Setopt(curl.OPT_POSTFIELDS, data);
-
-  var response []byte
-  onData := func (buf []byte, userdata interface{}) bool {
-    response = append(response, buf...)
-    return true
-  }
-  easy.Setopt(curl.OPT_WRITEFUNCTION, onData)
-
-  if err := easy.Perform(); err != nil {
+func doFetch(api string, contentType string, data string) ([]byte, error) {
+  res, err := http.Post(OPENWRT_HOST + api, contentType, strings.NewReader(data))
+  if err != nil {
     return []byte{}, err
   }
-  return response, nil
+
+  defer res.Body.Close()
+  body, err := ioutil.ReadAll(res.Body)
+  if err != nil {
+    return []byte{}, err
+  }
+
+  return body, nil
 }
 
-func doAuth() (*AuthResponse, error) {
-  auth := AuthRequest{
-    Id: 1,
-    Method: "login",
-    Params: []string{
-      OPENWRT_USER,
-      OPENWRT_PASS,
+func doAuth() (string, error) {
+  client := &http.Client{
+    CheckRedirect: func(req *http.Request, via []*http.Request) error {
+      return http.ErrUseLastResponse
     },
   }
 
-  body, err := json.Marshal(auth);
-  if err != nil {
-    return nil, err
+  params := url.Values{
+    "luci_username": {OPENWRT_USER},
+    "luci_password": {OPENWRT_PASS},
   }
 
-  data, err := doFetch("/cgi-bin/luci/rpc/auth", "GET", string(body))
+  req, err := http.NewRequest("POST", OPENWRT_HOST + "/cgi-bin/luci/", strings.NewReader(params.Encode()))
   if err != nil {
-    return nil, err
+    return "", err
   }
 
-  var response AuthResponse
-  err = json.Unmarshal(data, &response)
+  req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-  return &response, err
+  res, err := client.Do(req)
+  if err != nil {
+    return "", err
+  }
+
+  for _, cookie := range res.Cookies() {
+    if cookie.Name == "sysauth_http" {
+      return cookie.Value, nil
+    }
+  }
+
+  return "", fmt.Errorf("no cookie")
 }
 
 func getCIDR() (string, string, error) {
@@ -126,7 +117,7 @@ func getCIDR() (string, string, error) {
     return "", "", err
   }
 
-  data, err := doFetch("/ubus/", "POST", string(body))
+  data, err := doFetch("/ubus/", "application/json", string(body))
   if err != nil {
     return "", "", err
   }
@@ -191,12 +182,12 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
     if err != nil {
       if err.Error() == AccessDeniedErrMsg {
         failedCount = failedCount + 1
-        auth, err := doAuth()
+        token, err := doAuth()
         if err != nil {
           w.WriteHeader(statusFail)
           return
         }
-        OPENWRT_ACCESS_TOKEN = auth.Result
+        OPENWRT_ACCESS_TOKEN = token
       } else {
         w.WriteHeader(statusFail)
         return
@@ -229,12 +220,12 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
   if OPENWRT_ACCESS_TOKEN == "" {
-    auth, err := doAuth()
+    token, err := doAuth()
     if err != nil {
       fmt.Printf("Error: %s", err.Error())
       os.Exit(-1)
     }
-    OPENWRT_ACCESS_TOKEN = auth.Result
+    OPENWRT_ACCESS_TOKEN = token
   }
 
   http.HandleFunc("/", httpHandler)
