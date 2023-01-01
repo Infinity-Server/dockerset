@@ -26,6 +26,8 @@ var (
   STATUS_FAIL = os.Getenv("STATUS_FAIL")
 
   OPENWRT_ACCESS_TOKEN = ""
+  STATUS_OK_CODE = 0
+  STATUS_FAIL_CODE = 0
 )
 
 const (
@@ -55,6 +57,7 @@ func doFetch(api string, contentType string, data string) ([]byte, error) {
 }
 
 func doAuth() (string, error) {
+  fmt.Printf("[CHECKER] get access token from openwrt ...\n")
   client := &http.Client{
     CheckRedirect: func(req *http.Request, via []*http.Request) error {
       return http.ErrUseLastResponse
@@ -80,6 +83,7 @@ func doAuth() (string, error) {
 
   for _, cookie := range res.Cookies() {
     if cookie.Name == "sysauth_http" {
+      fmt.Printf("[CHECKER] openwrt sysauth_http=%s  ...\n", cookie.Value)
       return cookie.Value, nil
     }
   }
@@ -158,17 +162,16 @@ func getCIDR() (string, string, error) {
 }
 
 func httpHandler(w http.ResponseWriter, req *http.Request) {
-  statusFail, _ := strconv.Atoi(STATUS_FAIL)
-
   realIP := req.Header.Get("x-real-ip")
   if realIP == "" {
-    w.WriteHeader(statusFail)
+    w.WriteHeader(STATUS_FAIL_CODE)
     return
   }
+  fmt.Printf("[CHECKER] receive new request from ip=%s ...\n", realIP)
 
   ip := net.ParseIP(realIP)
   if ip == nil {
-    w.WriteHeader(statusFail)
+    w.WriteHeader(STATUS_FAIL_CODE)
     return
   }
 
@@ -182,14 +185,15 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
     if err != nil {
       if err.Error() == AccessDeniedErrMsg {
         failedCount = failedCount + 1
+        fmt.Printf("[CHECKER] openwrt access denied, retry count=%d ...\n", failedCount)
         token, err := doAuth()
         if err != nil {
-          w.WriteHeader(statusFail)
+          w.WriteHeader(STATUS_FAIL_CODE)
           return
         }
         OPENWRT_ACCESS_TOKEN = token
       } else {
-        w.WriteHeader(statusFail)
+        w.WriteHeader(STATUS_FAIL_CODE)
         return
       }
     } else {
@@ -199,23 +203,22 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
 
   ipv4Range, err := iprange.ParseRange(ipv4)
   if err != nil {
-    w.WriteHeader(statusFail)
+    w.WriteHeader(STATUS_FAIL_CODE)
     return
   }
 
   ipv6Range, err := iprange.ParseRange(ipv6)
   if err != nil {
-    w.WriteHeader(statusFail)
+    w.WriteHeader(STATUS_FAIL_CODE)
     return
   }
 
   if ipv4Range.Contains(ip) || ipv6Range.Contains(ip) {
-    status, _ := strconv.Atoi(STATUS_OK)
-    w.WriteHeader(status)
+    w.WriteHeader(STATUS_OK_CODE)
     return
   }
 
-  w.WriteHeader(statusFail)
+  w.WriteHeader(STATUS_FAIL_CODE)
 }
 
 func main() {
@@ -228,9 +231,15 @@ func main() {
     OPENWRT_ACCESS_TOKEN = token
   }
 
+  statusOk, _ := strconv.Atoi(STATUS_OK)
+  statusFail, _ := strconv.Atoi(STATUS_FAIL)
+  STATUS_OK_CODE = statusOk
+  STATUS_FAIL_CODE = statusFail
+
   http.HandleFunc("/", httpHandler)
   err := http.ListenAndServe(":" + LISTEN_PORT, nil)
   if err != nil {
     fmt.Println(err.Error())
   }
+  fmt.Printf("[CHECKER] start http server on port %s ...\n", LISTEN_PORT)
 }
