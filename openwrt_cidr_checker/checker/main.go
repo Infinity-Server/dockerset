@@ -240,6 +240,7 @@ func main() {
   err := http.ListenAndServe(":" + LISTEN_PORT, nil)
   if err != nil {
     fmt.Println(err.Error())
+    return
   }
   fmt.Printf("[CHECKER] start http server on port %s ...\n", LISTEN_PORT)
 }
