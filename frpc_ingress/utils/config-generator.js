@@ -30,11 +30,11 @@ watch.getOnce(
       }
       for (const item of items) {
         if (item.spec.kind === 'Config') {
-          allConfigs.set(extractConfigName(item.spec.namespace), new Map());
+          allConfigs.set(extractConfigName(item.metadata.namespace), new Map());
         }
       }
       for (const item of items) {
-        const frpcConfig = allConfigs.get(extractConfigName(item.spec.namespace));
+        const frpcConfig = allConfigs.get(extractConfigName(item.metadata.namespace));
         const name = item.metadata.name || 'undefined';
         const namespace = item.metadata.namespace || 'default';
         const frpcSection =
@@ -85,8 +85,8 @@ watch.getOnce(
           }
         }
         if (!frpcConfig.has('common')) {
-          console.error(`[ERROR] no common config(${extractConfigName(item.spec.namespace)}) ...`);
-          fs.writeFileSync(`/frp/client/${extractConfigName(item.spec.namespace)}.ini`, '', {encoding: 'utf-8'});
+          console.error(`[ERROR] no common config(${extractConfigName(item.metadata.namespace)}) ...`);
+          fs.writeFileSync(`/frp/client/${extractConfigName(item.metadata.namespace)}.ini`, '', {encoding: 'utf-8'});
           process.exit();
         }
         let configContent = makeSection(frpcConfig, 'common');
@@ -95,7 +95,7 @@ watch.getOnce(
             configContent += makeSection(frpcConfig, key);
           }
         }
-        fs.writeFileSync(`/frp/client/${extractConfigName(item.spec.namespace)}.ini`, configContent, {encoding: 'utf-8'});
+        fs.writeFileSync(`/frp/client/${extractConfigName(item.metadata.namespace)}.ini`, configContent, {encoding: 'utf-8'});
       }
     },
     (err) => {
