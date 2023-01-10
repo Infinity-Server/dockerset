@@ -14,8 +14,8 @@ const makeSection = (frpcConfig, key) => {
   return content;
 };
 
-const extractConfigName = (namespace) => {
-  return namespace || 'default';
+const extractConfigName = (name) => {
+  return name || 'default';
 };
 
 watch.getOnce(
@@ -30,15 +30,18 @@ watch.getOnce(
       }
       for (const item of items) {
         if (item.spec.kind === 'Config') {
-          allConfigs.set(extractConfigName(item.metadata.namespace), new Map());
+          allConfigs.set(extractConfigName(item.metadata.name), new Map());
         }
       }
       for (const item of items) {
-        const frpcConfig = allConfigs.get(extractConfigName(item.metadata.namespace));
         const name = item.metadata.name || 'undefined';
         const namespace = item.metadata.namespace || 'default';
         const frpcSection =
             (item.spec.kind === 'Config') ? 'common' : `${name}@${namespace}`;
+        const frpcConfigName = (item.spec.kind === 'Config') ?
+            item.metadata.name :
+            (item.spec.service && item.spec.service.targetConfig || '');
+        const frpcConfig = allConfigs.get(extractConfigName(frpcConfigName));
         if (frpcConfig.has(frpcSection)) {
           console.error(`[ERROR] duplicated section ${frpcSection} ...`);
           process.exit();
@@ -69,24 +72,26 @@ watch.getOnce(
               `local_port = ${item.spec.service.port}`,
             ];
             if (item.spec.service.remotePort) {
-              configSection.push(`remote_port = ${item.spec.service.remotePort}`)
+              configSection.push(
+                  `remote_port = ${item.spec.service.remotePort}`)
             }
             if (item.spec.service.customDomains) {
-              configSection.push(`custom_domains = ${item.spec.service.customDomains}`)
+              configSection.push(
+                  `custom_domains = ${item.spec.service.customDomains}`)
             }
             if (item.spec.service.subdomain) {
               configSection.push(`subdomain = ${item.spec.service.subdomain}`)
             }
-            frpcConfig.set(frpcSection, [
-              ...configSection,
-              ...extraConfig
-            ]);
+            frpcConfig.set(frpcSection, [...configSection, ...extraConfig]);
             break;
           }
         }
         if (!frpcConfig.has('common')) {
-          console.error(`[ERROR] no common config(${extractConfigName(item.metadata.namespace)}) ...`);
-          fs.writeFileSync(`/frp/client/${extractConfigName(item.metadata.namespace)}.ini`, '', {encoding: 'utf-8'});
+          console.error(`[ERROR] no common config(${
+              extractConfigName(frpcConfigName)}) ...`);
+          fs.writeFileSync(
+              `/frp/client/${extractConfigName(frpcConfigName)}.ini`, '',
+              {encoding: 'utf-8'});
           process.exit();
         }
         let configContent = makeSection(frpcConfig, 'common');
@@ -95,7 +100,9 @@ watch.getOnce(
             configContent += makeSection(frpcConfig, key);
           }
         }
-        fs.writeFileSync(`/frp/client/${extractConfigName(item.metadata.namespace)}.ini`, configContent, {encoding: 'utf-8'});
+        fs.writeFileSync(
+            `/frp/client/${extractConfigName(frpcConfigName)}.ini`,
+            configContent, {encoding: 'utf-8'});
       }
     },
     (err) => {

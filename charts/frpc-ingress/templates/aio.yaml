@@ -34,7 +34,10 @@ spec:
                   required:
                     - name
                     - port
+                    - targetConfig
                   properties:
+                    targetConfig:
+                      type: string
                     namespace:
                       type: string
                     name:
