@@ -62,7 +62,7 @@ spec:
                   type: array
                   items:
                     type: string
-  scope: Cluster
+  scope: Namespaced
   names:
     plural: frpc-ingresses
     singular: frpc-ingress

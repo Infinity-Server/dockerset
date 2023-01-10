@@ -12,14 +12,22 @@ EOF
 }
 
 hooks::on_startup() {
+  rm /frp/client/*
   node /utils/config-generator.js
-  screen -d -m /utils/keepalive /frp/frpc -c /frp/frpc.ini
+  for client in $(ls /frp/client);
+  do
+    screen -d -m /utils/keepalive /frp/frpc -c /frp/client/$client
+  done
 }
 
 hooks::on_event() {
+  pkill -9 screen
+  rm /frp/client/*
   node /utils/config-generator.js
-  pkill screen
-  screen -d -m /utils/keepalive /frp/frpc -c /frp/frpc.ini
+  for client in $(ls /frp/client);
+  do
+    screen -d -m /utils/keepalive /frp/frpc -c /frp/client/$client
+  done
 }
 
 hooks::main() {

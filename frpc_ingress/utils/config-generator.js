@@ -4,14 +4,18 @@ const k8s = require('./k8s');
 const kubeConfig = new k8s.KubeConfig();
 kubeConfig.loadFromDefault();
 const watch = new k8s.Watch(kubeConfig);
-const frpcConfig = new Map();
+const allConfigs = new Map();
 
-const makeSection = (key) => {
+const makeSection = (frpcConfig, key) => {
   let content = '';
   content += `[${key}]\n`;
   content += frpcConfig.get(key).join('\n');
   content += '\n\n';
   return content;
+};
+
+const extractConfigName = (namespace) => {
+  return namespace || 'default';
 };
 
 watch.getOnce(
@@ -25,7 +29,13 @@ watch.getOnce(
         process.exit();
       }
       for (const item of items) {
-        const name = item.metadata.name || '';
+        if (item.spec.kind === 'Config') {
+          allConfigs.set(extractConfigName(item.spec.namespace), new Map());
+        }
+      }
+      for (const item of items) {
+        const frpcConfig = allConfigs.get(extractConfigName(item.spec.namespace));
+        const name = item.metadata.name || 'undefined';
         const namespace = item.metadata.namespace || 'default';
         const frpcSection =
             (item.spec.kind === 'Config') ? 'common' : `${name}@${namespace}`;
@@ -74,19 +84,19 @@ watch.getOnce(
             break;
           }
         }
-      }
-      if (!frpcConfig.has('common')) {
-        console.error(`[ERROR] no common config ...`);
-        fs.writeFileSync('/frp/frpc.ini', '', {encoding: 'utf-8'});
-        process.exit();
-      }
-      let configContent = makeSection('common');
-      for (const key of frpcConfig.keys()) {
-        if (key !== 'common') {
-          configContent += makeSection(key);
+        if (!frpcConfig.has('common')) {
+          console.error(`[ERROR] no common config(${extractConfigName(item.spec.namespace)}) ...`);
+          fs.writeFileSync(`/frp/client/${extractConfigName(item.spec.namespace)}.ini`, '', {encoding: 'utf-8'});
+          process.exit();
         }
+        let configContent = makeSection(frpcConfig, 'common');
+        for (const key of frpcConfig.keys()) {
+          if (key !== 'common') {
+            configContent += makeSection(frpcConfig, key);
+          }
+        }
+        fs.writeFileSync(`/frp/client/${extractConfigName(item.spec.namespace)}.ini`, configContent, {encoding: 'utf-8'});
       }
-      fs.writeFileSync('/frp/frpc.ini', configContent, {encoding: 'utf-8'});
     },
     (err) => {
       console.error(`[ERROR] exit with err: ${err}`);
