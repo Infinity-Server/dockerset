@@ -91,7 +91,7 @@ func doAuth() (string, error) {
   return "", fmt.Errorf("no cookie")
 }
 
-func getCIDR() (string, string, error) {
+func getCIDR() ([]string, []string, error) {
   CallArgsOne := "network.interface"
   CallArgsTwo := "dump"
   request := Welcome{
@@ -118,40 +118,38 @@ func getCIDR() (string, string, error) {
 
   body, err := json.Marshal(request);
   if err != nil {
-    return "", "", err
+    return []string{}, []string{}, err
   }
 
   data, err := doFetch("/ubus/", "application/json", string(body))
   if err != nil {
-    return "", "", err
+    return []string{}, []string{}, err
   }
 
   var response Welcome
   err = json.Unmarshal(data, &response)
   if err != nil {
-    return "", "", nil
+    return []string{}, []string{}, nil
   }
 
-  ipv4 := ""
-  ipv6 := ""
+  var ipv4 []string
+  var ipv6 []string
 
   for _, w := range response {
     if w.Error != nil {
-      return "", "", fmt.Errorf(w.Error.Message)
+      return []string{}, []string{}, fmt.Errorf(w.Error.Message)
     }
     for _, r := range w.Result {
       if r.RealResult != nil {
         for _, i := range r.RealResult.Interface {
           if i.Interface == OPENWRT_IFACE {
-            ipv4 = fmt.Sprintf("%s/%d", i.Ipv4Address[0].Address, i.Ipv4Address[0].Mask)
-          }
-          if len(i.Ipv6Prefix) > 0 {
-            for _, prefix := range i.Ipv6Prefix {
-              for k, v := range prefix.Assigned {
-                if k == OPENWRT_IFACE {
-                  ipv6 = fmt.Sprintf("%s/%d", v.Address, v.Mask)
-                }
-              }
+            for _, addr := range i.Ipv4Address {
+              cidr := fmt.Sprintf("%s/%d", addr.Address, addr.Mask)
+              ipv4 = append(ipv4, cidr)
+            }
+            for _, addr := range i.Ipv6PrefixAssignment {
+              cidr := fmt.Sprintf("%s/%d", addr.Address, addr.Mask)
+              ipv6 = append(ipv4, cidr)
             }
           }
         }
@@ -175,8 +173,8 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  ipv4 := ""
-  ipv6 := ""
+  var ipv4 []string
+  var ipv6 []string
   failedCount := 0
   for failedCount < FailedCountLimit {
     _ipv4, _ipv6, err := getCIDR()
@@ -201,21 +199,21 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
     }
   }
 
-  ipv4Range, err := iprange.ParseRange(ipv4)
-  if err != nil {
-    w.WriteHeader(STATUS_FAIL_CODE)
-    return
+  var ipRanges []iprange.Range
+  for _, cidr := range append(ipv4, ipv6...) {
+    ipRange, err := iprange.ParseRange(cidr)
+    if err != nil {
+      fmt.Printf("[CHECKER] parse failed for cidr=%s", ip)
+    } else {
+      ipRanges = append(ipRanges, ipRange)
+    }
   }
 
-  ipv6Range, err := iprange.ParseRange(ipv6)
-  if err != nil {
-    w.WriteHeader(STATUS_FAIL_CODE)
-    return
-  }
-
-  if ipv4Range.Contains(ip) || ipv6Range.Contains(ip) {
-    w.WriteHeader(STATUS_OK_CODE)
-    return
+  for _, ipRange := range ipRanges {
+    if ipRange.Contains(ip) {
+      w.WriteHeader(STATUS_OK_CODE)
+      return
+    }
   }
 
   w.WriteHeader(STATUS_FAIL_CODE)
