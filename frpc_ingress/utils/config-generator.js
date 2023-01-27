@@ -25,7 +25,7 @@ watch.getOnce(
       try {
         items = JSON.parse(result).items;
       } catch (e) {
-        console.error('[ERROR] get items failed ...');
+        console.error('[ERRO] get items failed ...');
         process.exit();
       }
       for (const item of items) {
@@ -43,22 +43,21 @@ watch.getOnce(
             (item.spec.service && item.spec.service.targetConfig || '');
         const frpcConfig = allConfigs.get(extractConfigName(frpcConfigName));
         if (frpcConfig.has(frpcSection)) {
-          console.error(`[ERROR] duplicated section ${frpcSection} ...`);
-          process.exit();
+          console.error(`[ERRO] duplicated section ${frpcSection}, remain the new one ...`);
         }
         switch (item.spec.kind) {
           case 'Config': {
             if (!item.spec.config || item.spec.config.length === 0) {
-              console.error('[ERROR] empty config ...');
-              process.exit();
+              console.error('[ERRO] empty config detected, ignore it ...');
+            } else {
+              frpcConfig.set(frpcSection, item.spec.config);
             }
-            frpcConfig.set(frpcSection, item.spec.config);
             break;
           }
           case 'Rule': {
             if (!item.spec.service) {
-              console.error('[ERROR] empty rule ...');
-              process.exit();
+              console.error('[ERRO] empty rule, ignore it ...');
+              break;
             }
             const type = item.spec.service.protocol ?
                 item.spec.service.protocol.toLowerCase() :
@@ -87,12 +86,10 @@ watch.getOnce(
           }
         }
         if (!frpcConfig.has('common')) {
-          console.error(`[ERROR] no common config(${
-              extractConfigName(frpcConfigName)}) ...`);
           fs.writeFileSync(
               `/frp/client/${extractConfigName(frpcConfigName)}.ini`, '',
               {encoding: 'utf-8'});
-          process.exit();
+          continue;
         }
         let configContent = makeSection(frpcConfig, 'common');
         for (const key of frpcConfig.keys()) {
@@ -106,6 +103,6 @@ watch.getOnce(
       }
     },
     (err) => {
-      console.error(`[ERROR] exit with err: ${err}`);
+      console.error(`[ERRO] exit with err: ${err}`);
       process.exit();
     });

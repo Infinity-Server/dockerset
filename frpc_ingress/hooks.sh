@@ -22,6 +22,7 @@ hooks::on_startup() {
 
 hooks::on_event() {
   pkill -9 screen
+  screen -wipe
   rm /frp/client/*
   node /utils/config-generator.js
   for client in $(ls /frp/client);
