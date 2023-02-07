@@ -32,11 +32,13 @@ http://:${WEB_PORT} {
     header_up Host 127.0.0.1:${WEBUI_PORT}
     header_up Origin http://127.0.0.1:${WEBUI_PORT}
     header_up Referer http://127.0.0.1:${WEBUI_PORT}
+    header_up X-Forwarded-Host 127.0.0.1:${WEBUI_PORT}
   }
   reverse_proxy @mobile_api http://127.0.0.1:${WEBUI_PORT} {
     header_up Host 127.0.0.1:${WEBUI_PORT}
     header_up Origin http://127.0.0.1:${WEBUI_PORT}
     header_up Referer http://127.0.0.1:${WEBUI_PORT}
+    header_up X-Forwarded-Host 127.0.0.1:${WEBUI_PORT}
   }
   file_server @mobile_ui {
     root /vuetorrent
