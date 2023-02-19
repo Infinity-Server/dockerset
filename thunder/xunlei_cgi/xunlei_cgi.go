@@ -22,6 +22,7 @@ const (
   SYNOPKG_DSM_VERSION_MAJOR = "7"
   SYNOPKG_DSM_VERSION_MINOR = "0"
   SYNOPKG_DSM_VERSION_BUILD = "1"
+  SYNOPLATFORM              = "Synology"
   SYNOPKG_PKGNAME           = "pan-xunlei-com"
   SYNOPKG_PKGBASE           = "/tmp/go-build/" + SYNOPKG_PKGNAME
   SYNOPKG_RUNTIME           = "/var/packages/" + SYNOPKG_PKGNAME + "/target/var/"
@@ -112,6 +113,7 @@ func (d *XunleiDaemon) getEnv() (environs []string) {
   environs = append(environs, "SYNOPKG_DSM_VERSION_MAJOR="+SYNOPKG_DSM_VERSION_MAJOR)
   environs = append(environs, "SYNOPKG_DSM_VERSION_MINOR="+SYNOPKG_DSM_VERSION_MINOR)
   environs = append(environs, "SYNOPKG_DSM_VERSION_BUILD="+SYNOPKG_DSM_VERSION_BUILD)
+  environs = append(environs, "SYNOPLATFORM="+SYNOPLATFORM)
   environs = append(environs, "SYNOPKG_PKGDEST="+SYNOPKG_PKGDEST)
   environs = append(environs, "SYNOPKG_PKGNAME="+SYNOPKG_PKGNAME)
   environs = append(environs, "SVC_CWD="+SYNOPKG_PKGDEST)

@@ -21,6 +21,8 @@ RUN mkdir -p /var/packages/pan-xunlei-com/shares && \
     mv /var/packages/pan-xunlei-com/target/xunlei-pan-cli-launcher* /var/packages/pan-xunlei-com/target/xunlei-pan-cli-launcher && \
     mkdir -p /usr/syno/synoman/webman/modules && \
     echo '#!/bin/bash' > /usr/syno/synoman/webman/modules/authenticate.cgi && \
+    echo 'echo Content-Type: text/plain' >> /usr/syno/synoman/webman/modules/authenticate.cgi && \
+    echo 'echo' >> /usr/syno/synoman/webman/modules/authenticate.cgi && \
     echo 'echo dosk' >> /usr/syno/synoman/webman/modules/authenticate.cgi && \
     chmod 755 /usr/syno/synoman/webman/modules/authenticate.cgi && \
     rm -rvf /work
