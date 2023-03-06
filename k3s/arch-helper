@@ -1,0 +1,19 @@
+#!/bin/sh
+
+file_prefix="$1"
+current_arch="$(apk --print-arch)"
+
+if [ "${current_arch}" = "x86_64" ];
+then
+  echo -n "${file_prefix}"
+fi
+
+if [ "$current_arch" = "aarch64" ];
+then
+  echo -n "${file_prefix}-arm64"
+fi
+
+if [ "$current_arch" = "armv7" ];
+then
+  echo -n "${file_prefix}-armhf"
+fi
