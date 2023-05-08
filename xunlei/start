@@ -1,5 +1,11 @@
 #!/bin/bash
 
-/opt/apps/com.xunlei.download/files/start.sh
-xpra stop
-pkill tail
+xpra start \
+  --html=on \
+  --daemon=off \
+  --notifications=no \
+  --exit-with-children \
+  --terminate-children \
+  --bind-tcp=0.0.0.0:7010 \
+  --resize-display=1024x768 \
+  --start-child=/opt/apps/com.xunlei.download/files/start.sh

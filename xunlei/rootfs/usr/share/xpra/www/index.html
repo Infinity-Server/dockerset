@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  Author: SpringHack - springhack@live.cn
+  Last modified: 2023-05-08 13:48:06
+  Filename: rootfs/usr/share/xpra/www/index.html
+  Description: Created by SpringHack using vim automatically.
+-->
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <title>Xunlei @ Xpra</title>
+  </head>
+  <body>
+    <div class='window'>
+      <div class='title-bar'>Xunlei @ Xpra</div>
+      <iframe src='/remote.html' width='1024' height='768'></iframe>
+    </div>
+  </body>
+  <style>
+    *, body, html, div {
+      margin: 0;
+      border: 0;
+      padding: 0;
+    }
+    iframe {
+      margin: 0;
+      border: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      background-color: black;
+    }
+    .title-bar {
+      height: 20px;
+      color: black;
+      width: 1024px;
+      display: flex;
+      background: white;
+      align-items: center;
+      font-family: monospace;
+      justify-content: center;
+    }
+    .window {
+      width: 1024px;
+      height: 788px;
+      display: flex;
+      overflow: hidden;
+      align-items: center;
+      border-radius: 10px;
+      flex-direction: column;
+      justify-content: center;
+      animation: 3s blink infinite;
+      box-shadow: #919191 0px 0px 20px 5px;
+    }
+    @keyframes blink {
+      0% {
+        box-shadow: #919191 0px 0px 20px 5px;
+      }
+      50% {
+        box-shadow: #919191 0px 0px 20px 10px;
+      }
+      100% {
+        box-shadow: #919191 0px 0px 20px 5px;
+      }
+    }
+  </style>
+</html>
