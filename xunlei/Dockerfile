@@ -41,6 +41,7 @@ RUN apt install -y pcmanfm && \
 ADD start /start
 ADD rootfs /rootfs
 RUN mv /usr/share/xpra/www/index.html /usr/share/xpra/www/remote.html && \
+    mv /usr/bin/df /usr/bin/df.elf && \
     cp -rvf /rootfs/* / && \
     rm -rvf /rootfs && \
     rm -rvf pcmanfm.desktop

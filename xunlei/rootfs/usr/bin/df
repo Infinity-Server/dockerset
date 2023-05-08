@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function check_ip() {
+  local IP=$1
+  VALID_CHECK=$(echo $IP | awk -F. '$1<=255&&$2<=255&&$3<=255&&$4<=255{print "yes"}')
+  if echo $IP | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" > /dev/null;
+  then
+    if [ $VALID_CHECK == "yes" ];
+    then
+      return 0
+    else
+      return 1
+    fi
+  else
+    return 1
+  fi
+}
+
+df.elf $@ |\
+while IFS="" read line;
+do
+  maybe_ip="$(echo $line | awk -F: '{print $1}')"
+  check_ip $maybe_ip
+  if [ $? -eq 0 ];
+  then
+    echo "/dev/net/$line"
+  else
+    echo "$line"
+  fi
+done
