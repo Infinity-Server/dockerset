@@ -29,12 +29,12 @@ jobs:
           push: true
           context: ${{ github.job }}
           file: ${{ github.job }}/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          platforms: linux/amd64,linux/arm64/v8
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
           build-args: |
-            VUE_TORRENT_VERSION=1.2.0
+            VUE_TORRENT_VERSION=1.6.0
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:
