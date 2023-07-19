@@ -6,9 +6,34 @@ require_once(__ROOT__.'/WebAuthn/WebAuthn.php');
 @persistent_start();
 
 try {
-  // read get argument and post body
-  $fn = filter_input(INPUT_GET, 'fn');
+  // route parse
+  $fn = '';
+  $url = parse_url($_SERVER['REQUEST_URI']);
 
+  switch ($url['path']) {
+    case '/webauthn/getGetArgs':
+    case '/webauthn/getCreateArgs':
+    case '/webauthn/processGet':
+    case '/webauthn/processCreate':
+    case '/webauthn/clearRegistrations':
+      $fn = substr($url['path'], strlen('/webauthn/'));
+      break;
+    case '/webauthn/webauthn.js':
+      header('Content-Type: application/javascript');
+      readfile('webauthn.js');
+      exit();
+      break;
+    case '/':
+    case '/index.html':
+      readfile('index.html');
+      exit();
+      break;
+    default:
+      http_response_code(404);
+      die();
+  }
+
+  // read get argument and post body
   $userId = filter_input(INPUT_GET, 'userId', FILTER_SANITIZE_SPECIAL_CHARS);
   $userName = filter_input(INPUT_GET, 'userName', FILTER_SANITIZE_SPECIAL_CHARS);
   $userDisplayName = filter_input(INPUT_GET, 'userDisplayName', FILTER_SANITIZE_SPECIAL_CHARS);

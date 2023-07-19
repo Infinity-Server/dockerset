@@ -13,7 +13,7 @@
   }
 
   function getGetParams() {
-    let url = '';
+    let url = '?';
     url += '&userId=' + params.userId;
     url += '&userName=' + params.userName;
     url += '&userDisplayName=' + params.userDisplayName;
@@ -22,7 +22,7 @@
 
   async function register() {
     // get create args
-    let rep = await fetch('webauthn.php?fn=getCreateArgs' + getGetParams(), {method:'GET', cache:'no-cache'});
+    let rep = await fetch('/webauthn/getCreateArgs' + getGetParams(), {method:'GET', cache:'no-cache'});
     const createArgs = await rep.json();
 
     // error handling
@@ -43,7 +43,7 @@
     };
 
     // check auth on server side
-    rep = await fetch('webauthn.php?fn=processCreate' + getGetParams(), {
+    rep = await fetch('/webauthn/processCreate' + getGetParams(), {
       method  : 'POST',
       body    : JSON.stringify(authenticatorAttestationResponse),
       cache   : 'no-cache'
@@ -60,7 +60,7 @@
 
   async function authenticate() {
     // get check args
-    let rep = await fetch('webauthn.php?fn=getGetArgs' + getGetParams(), {method:'GET',cache:'no-cache'});
+    let rep = await fetch('/webauthn/getGetArgs' + getGetParams(), {method:'GET',cache:'no-cache'});
     const getArgs = await rep.json();
 
     // error handling
@@ -83,7 +83,7 @@
     };
 
     // send to server
-    rep = await fetch('webauthn.php?fn=processGet' + getGetParams(), {
+    rep = await fetch('/webauthn/processGet' + getGetParams(), {
       method:'POST',
       body: JSON.stringify(authenticatorAttestationResponse),
       cache:'no-cache'
@@ -99,7 +99,7 @@
   }
 
   async function clearRegistration() {
-    const resp = await fetch('webauthn.php?fn=clearRegistrations' + getGetParams(), {method:'GET',cache:'no-cache'});
+    const resp = await fetch('/webauthn/clearRegistrations' + getGetParams(), {method:'GET',cache:'no-cache'});
     const json = await resp.json();
     if (json.success) {
       return 'success';

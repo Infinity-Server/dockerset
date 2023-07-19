@@ -10,4 +10,4 @@ EXPOSE 8000
 WORKDIR /code/Public
 
 ENTRYPOINT ["php"]
-CMD ["-S", "0.0.0.0:8000"]
+CMD ["-S", "0.0.0.0:8000", "webauthn.php"]
