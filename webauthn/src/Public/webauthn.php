@@ -184,6 +184,14 @@ try {
     $return->success = true;
 
     header('Content-Type: application/json');
+    if (getenv("WEBAUTHN_HEADER_NAME") && getenv("WEBAUTHN_HEADER_VALUE") || getenv("WEBAUTHN_HEADER_FILE")) {
+      if (getenv("WEBAUTHN_HEADER_VALUE")) {
+        header(getenv("WEBAUTHN_HEADER_NAME") . ": " . getenv("WEBAUTHN_HEADER_VALUE"));
+      } else {
+        header(getenv("WEBAUTHN_HEADER_NAME") . ": " . file_get_contents(getenv("WEBAUTHN_HEADER_FILE")));
+      }
+    }
+
     print(json_encode($return));
   } else if ($fn === 'clearRegistrations') {
     // ------------------------------------
