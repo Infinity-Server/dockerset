@@ -77,7 +77,7 @@ try {
     // request for create arguments
     // ------------------------------------
 
-    $createArgs = $WebAuthn->getCreateArgs(\hex2bin($userId), $userName, $userDisplayName, 20, false, false, $crossPlatformAttachment);
+    $createArgs = $WebAuthn->getCreateArgs(\hex2bin($userId), $userName, $userDisplayName, 20, 'discouraged', 'discouraged', $crossPlatformAttachment);
 
     header('Content-Type: application/json');
     print(json_encode($createArgs));
@@ -106,7 +106,7 @@ try {
       throw new Exception('no registrations in session for userId ' . $userId);
     }
 
-    $getArgs = $WebAuthn->getGetArgs($ids, 20, true, true, true, true, true, false);
+    $getArgs = $WebAuthn->getGetArgs($ids, 20, true, true, true, true, true, 'discouraged');
 
     header('Content-Type: application/json');
     print(json_encode($getArgs));
@@ -178,18 +178,14 @@ try {
     }
 
     // process the get request. throws WebAuthnException if it fails
-    $WebAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $credentialPublicKey, $challenge, null, false);
+    $WebAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $credentialPublicKey, $challenge, false, false);
 
     $return = new stdClass();
     $return->success = true;
 
     header('Content-Type: application/json');
-    if (getenv("WEBAUTHN_HEADER_NAME") && getenv("WEBAUTHN_HEADER_VALUE") || getenv("WEBAUTHN_HEADER_FILE")) {
-      if (getenv("WEBAUTHN_HEADER_VALUE")) {
-        header(getenv("WEBAUTHN_HEADER_NAME") . ": " . getenv("WEBAUTHN_HEADER_VALUE"));
-      } else {
-        header(getenv("WEBAUTHN_HEADER_NAME") . ": " . file_get_contents(getenv("WEBAUTHN_HEADER_FILE")));
-      }
+    if (getenv("WEBAUTHN_SUCCESS_INCLUDE") && file_exists(getenv("WEBAUTHN_SUCCESS_INCLUDE"))) {
+      include(getenv("WEBAUTHN_SUCCESS_INCLUDE"));
     }
 
     print(json_encode($return));
