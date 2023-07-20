@@ -83,7 +83,7 @@ try {
     print(json_encode($createArgs));
 
     // save challange to session. you have to deliver it to processGet later.
-    $_SESSION['challenge'] = $WebAuthn->getChallenge();
+    $_PERSISTENT['challenge'] = $WebAuthn->getChallenge();
   } else if ($fn === 'getGetArgs') {
     // ------------------------------------
     // request for get arguments
@@ -94,8 +94,8 @@ try {
     // load registrations from session stored there by processCreate.
     // normaly you have to load the credential Id's for a username
     // from the database.
-    if (isset($_SESSION['registrations']) && is_array($_SESSION['registrations'])) {
-      foreach ($_SESSION['registrations'] as $reg) {
+    if (isset($_PERSISTENT['registrations']) && is_array($_PERSISTENT['registrations'])) {
+      foreach ($_PERSISTENT['registrations'] as $reg) {
         if ($reg->userId === $userId) {
           $ids[] = $reg->credentialId;
         }
@@ -112,7 +112,7 @@ try {
     print(json_encode($getArgs));
 
     // save challange to session. you have to deliver it to processGet later.
-    $_SESSION['challenge'] = $WebAuthn->getChallenge();
+    $_PERSISTENT['challenge'] = $WebAuthn->getChallenge();
   } else if ($fn === 'processCreate') {
     // ------------------------------------
     // process create
@@ -120,7 +120,7 @@ try {
 
     $clientDataJSON = base64_decode($post->clientDataJSON);
     $attestationObject = base64_decode($post->attestationObject);
-    $challenge = $_SESSION['challenge'];
+    $challenge = $_PERSISTENT['challenge'];
 
     // processCreate returns data to be stored for future logins.
     // in this example we store it in the php session.
@@ -133,10 +133,10 @@ try {
     $data->userName = $userName;
     $data->userDisplayName = $userDisplayName;
 
-    if (!isset($_SESSION['registrations']) || !array_key_exists('registrations', $_SESSION) || !is_array($_SESSION['registrations'])) {
-      $_SESSION['registrations'] = [];
+    if (!isset($_PERSISTENT['registrations']) || !array_key_exists('registrations', $_PERSISTENT) || !is_array($_PERSISTENT['registrations'])) {
+      $_PERSISTENT['registrations'] = [];
     }
-    $_SESSION['registrations'][] = $data;
+    $_PERSISTENT['registrations'][] = $data;
 
     $msg = 'registration success.';
     if ($data->rootValid === false) {
@@ -158,14 +158,14 @@ try {
     $authenticatorData = base64_decode($post->authenticatorData);
     $signature = base64_decode($post->signature);
     $id = base64_decode($post->id);
-    $challenge = $_SESSION['challenge'] ?? '';
+    $challenge = $_PERSISTENT['challenge'] ?? '';
     $credentialPublicKey = null;
 
     // looking up correspondending public key of the credential id
     // you should also validate that only ids of the given user name
     // are taken for the login.
-    if (isset($_SESSION['registrations']) && is_array($_SESSION['registrations'])) {
-      foreach ($_SESSION['registrations'] as $reg) {
+    if (isset($_PERSISTENT['registrations']) && is_array($_PERSISTENT['registrations'])) {
+      foreach ($_PERSISTENT['registrations'] as $reg) {
         if ($reg->credentialId === $id) {
           $credentialPublicKey = $reg->credentialPublicKey;
           break;
@@ -198,8 +198,8 @@ try {
     // proccess clear registrations
     // ------------------------------------
 
-    $_SESSION['registrations'] = null;
-    $_SESSION['challenge'] = null;
+    $_PERSISTENT['registrations'] = null;
+    $_PERSISTENT['challenge'] = null;
 
     $return = new stdClass();
     $return->success = true;

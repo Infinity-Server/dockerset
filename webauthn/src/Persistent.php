@@ -1,18 +1,20 @@
 <?php
 
+$_PERSISTENT = [];
+
 function persistent_start() {
-  session_start();
-  global $_SESSION;
+  global $_PERSISTENT;
   if (file_exists('/data/persistent.db')) {
     $data = file_get_contents('/data/persistent.db');
     try {
-      $_SESSION = unserialize($data);
+      $_PERSISTENT = unserialize($data);
     } catch (Throwable) {
-      $_SESSION = [];
+      $_PERSISTENT = [];
     }
   }
 }
 
 function persistent_end() {
-  file_put_contents('/data/persistent.db', serialize($_SESSION));
+  global $_PERSISTENT;
+  file_put_contents('/data/persistent.db', serialize($_PERSISTENT));
 }
