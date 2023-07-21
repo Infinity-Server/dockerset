@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
   </head>
   <body>
-    <button id="ready">READY</button>
+    <button style="display:none;" id="ready">READY</button>
     <dialog id="dialog">
       <div id="buttons">
         <button>Register</button>
@@ -44,9 +44,10 @@
       }
     </style>
     <script>
+      const ready = document.getElementById('ready');
       const dialog = document.getElementById('dialog');
       const actions = ['register', 'authenticate', 'clearRegistration']
-      document.getElementById('ready').addEventListener('click', () => {
+      ready.addEventListener('click', () => {
         dialog.showModal();
       });
       [...dialog.getElementsByTagName('button')].forEach((button, index) => {
@@ -60,6 +61,7 @@
           }
         });
       });
+      ready.style.display = 'block';
     </script>
   </body>
 </html>
