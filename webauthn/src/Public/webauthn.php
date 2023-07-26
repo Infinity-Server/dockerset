@@ -83,7 +83,7 @@ try {
     print(json_encode($createArgs));
 
     // save challange to session. you have to deliver it to processGet later.
-    $_PERSISTENT['challenge'] = $WebAuthn->getChallenge();
+    $_SESSION['challenge'] = $WebAuthn->getChallenge();
   } else if ($fn === 'getGetArgs') {
     // ------------------------------------
     // request for get arguments
@@ -112,7 +112,7 @@ try {
     print(json_encode($getArgs));
 
     // save challange to session. you have to deliver it to processGet later.
-    $_PERSISTENT['challenge'] = $WebAuthn->getChallenge();
+    $_SESSION['challenge'] = $WebAuthn->getChallenge();
   } else if ($fn === 'processCreate') {
     // ------------------------------------
     // process create
@@ -120,7 +120,7 @@ try {
 
     $clientDataJSON = base64_decode($post->clientDataJSON);
     $attestationObject = base64_decode($post->attestationObject);
-    $challenge = $_PERSISTENT['challenge'];
+    $challenge = $_SESSION['challenge'];
 
     // processCreate returns data to be stored for future logins.
     // in this example we store it in the php session.
@@ -158,7 +158,7 @@ try {
     $authenticatorData = base64_decode($post->authenticatorData);
     $signature = base64_decode($post->signature);
     $id = base64_decode($post->id);
-    $challenge = $_PERSISTENT['challenge'] ?? '';
+    $challenge = $_SESSION['challenge'] ?? '';
     $credentialPublicKey = null;
 
     // looking up correspondending public key of the credential id
@@ -195,7 +195,7 @@ try {
     // ------------------------------------
 
     $_PERSISTENT['registrations'] = null;
-    $_PERSISTENT['challenge'] = null;
+    $_SESSION['challenge'] = null;
 
     $return = new stdClass();
     $return->success = true;

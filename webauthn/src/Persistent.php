@@ -4,6 +4,8 @@ $_PERSISTENT = [];
 
 function persistent_start() {
   global $_PERSISTENT;
+  session_name('webauthn_session');
+  session_start();
   if (file_exists('/data/persistent.db')) {
     $data = file_get_contents('/data/persistent.db');
     try {
