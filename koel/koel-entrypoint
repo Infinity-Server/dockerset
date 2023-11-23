@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+# Change to program root directory.
+cd /var/www/html
+
+# Run the next entrypoint in the chain.
+echo "running docker-php-entrypoint with arguments $@"
+docker-php-entrypoint $@
