@@ -60,14 +60,33 @@ a {
   box-sizing: border-box;
   padding: 2.4rem 2rem 1.8rem 2rem;
 }
-@keyframes gradient {
-  0% {
-    background-position: 0% 0%;
-  }
-  50% {
-    background-position: 100% 100%;
-  }
-  100% {
-    background-position: 0% 0%;
-  }
-} 
+
+#k8s {
+  display: flex;
+  margin: 4rem 0;
+  flex-wrap: wrap;
+  font-size: 1.2rem;
+  justify-content: center;
+}
+
+.metrics {
+  width: 30rem;
+  margin: 0 2rem;
+  text-align: center;
+}
+
+.progress-bar {
+  display: flex;
+  height: 0.4rem;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  justify-content: end;
+  background: linear-gradient(to right, #55ff32 0%, #fff130 30%, #ff9028 70%, #ff0000 100%);
+}
+
+.progress-fill {
+  height: 1rem;
+  transition: 0.5s all;
+  background-color: rgb(55,23,77);
+}
