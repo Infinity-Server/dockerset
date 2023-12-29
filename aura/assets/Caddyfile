@@ -1,0 +1,34 @@
+{
+  admin off
+  auto_https off
+}
+
+:8000 {
+  handle_path /services {
+    rewrite * "/apis/{env.API_GROUP}/{env.API_VERSION}/{env.API_CRD}"
+    reverse_proxy 127.0.0.1:6000 {
+      header_up Host {upstream_hostport}
+    }
+  }
+  handle_path /pods {
+    rewrite * "/api/v1/pods"
+    reverse_proxy 127.0.0.1:6000 {
+      header_up Host {upstream_hostport}
+    }
+  }
+  handle_path /nodes {
+    rewrite * "/api/v1/nodes"
+    reverse_proxy 127.0.0.1:6000 {
+      header_up Host {upstream_hostport}
+    }
+  }
+  handle_path /metrics {
+    rewrite * "/apis/metrics.k8s.io/v1beta1/nodes"
+    reverse_proxy 127.0.0.1:6000 {
+      header_up Host {upstream_hostport}
+    }
+  }
+  file_server * {
+    root /etc/caddy
+  }
+}

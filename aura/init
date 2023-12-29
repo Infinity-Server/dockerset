@@ -1,0 +1,4 @@
+#!/bin/sh
+
+kubectl proxy --port=6000 &
+caddy run --config /etc/caddy/Caddyfile --adapter caddyfile

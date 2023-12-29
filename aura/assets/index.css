@@ -1,0 +1,73 @@
+* {
+  color: white;
+  user-select: none;
+  font-family: fantasy, cursive, Arial;
+}
+html {
+  font-size: 62.5%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  position: relative;
+  touch-action: pan-x pan-y;
+  background-color: #808;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: bottom center, 50%, 50%;
+  background-image: url(mountain.svg), url(line.svg);
+}
+#title {
+  font-size: 2.5rem;
+  text-align: center;
+  padding: 8rem 0 3rem 0;
+}
+#root {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 2rem 4rem 2rem;
+  justify-content: space-around;
+}
+#power {
+  width: 100vw;
+  bottom: 0.6rem;
+  font-size: 1.2rem;
+  position: absolute;
+  text-align: center;
+  transform: scale(0.5);
+}
+.icon {
+  font-size: 2rem;
+}
+.name {
+  flex-grow: 1;
+  text-align: center;
+}
+.item {
+  width: max(34rem, 20vw - 7.6rem);
+}
+a {
+  width: 34rem;
+  display: flex;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1.4rem;
+  margin: 4rem 0 0 0;
+  align-items: center;
+  border-radius: 1rem;
+  background: #01262699;
+  text-decoration: none;
+  box-sizing: border-box;
+  padding: 2.4rem 2rem 1.8rem 2rem;
+}
+@keyframes gradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+} 
