@@ -44,6 +44,8 @@ body {
   text-align: center;
 }
 .item {
+  display: flex;
+  justify-content: center;
   width: max(34rem, 20vw - 7.6rem);
 }
 a {
