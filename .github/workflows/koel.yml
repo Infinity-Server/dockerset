@@ -34,7 +34,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
           build-args: |
-            KOEL_VERSION_REF=v6.11.5
+            KOEL_VERSION_REF=v6.12.1
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:
