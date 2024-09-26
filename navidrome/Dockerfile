@@ -2,18 +2,17 @@ ARG ND_VER=latest
 
 #####################################################
 ### build navidrome
-FROM golang:1.23.1-bookworm AS builder
+FROM deluan/ci-goreleaser AS builder
 ARG ND_VER=latest
 WORKDIR /go/src
 COPY . /go/src/navidrome
-RUN apt update -y && apt install -y build-essential libtag1-dev pkg-config
 RUN cd /go/src/navidrome && \
     go get github.com/navidrome/navidrome@v$ND_VER && \
     go mod tidy && \
     go build \
         -a -v \
         -gcflags="all=-l" \
-        -ldflags="-X github.com/navidrome/navidrome/consts.gitSha=SpringHack -X github.com/navidrome/navidrome/consts.gitTag=$ND_VER"
+        -ldflags="-extldflags -static -X github.com/navidrome/navidrome/consts.gitSha=SpringHack -X github.com/navidrome/navidrome/consts.gitTag=$ND_VER"
 
 #####################################################
 ### build gorip
@@ -31,9 +30,9 @@ RUN gorip -e /app/navidrome && ls -alth /code
 
 #####################################################
 ### build final image
-FROM debian:bookworm
+FROM alpine:3.20
 LABEL maintainer="springhack@lvie.cn"
-RUN apt update -y && apt install -y ffmpeg mpv libtag1-dev && apt clean
+RUN apk add -U --no-cache ffmpeg mpv libtag
 RUN ffmpeg -buildconf
 COPY --from=builder /go/src/navidrome/navidrome /app/navidrome
 COPY --from=assets /code/build /app/build
