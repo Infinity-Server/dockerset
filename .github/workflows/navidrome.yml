@@ -4,10 +4,10 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/navidrome_lrc.yml
-      - navidrome_lrc/**
+      - .github/workflows/navidrome.yml
+      - navidrome/**
 jobs:
-  navidrome_lrc:
+  navidrome:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,6 +33,8 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
+          build-args: |
+            ND_VER=0.53.2
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:
