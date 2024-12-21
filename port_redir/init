@@ -1,0 +1,10 @@
+#!/bin/sh
+for v in $(env | grep -E '^(TCP|UDP)_[0-9]+_[0-9]+='); do
+  n=$(echo "$v" | cut -d= -f1)
+  t=$(echo "$v" | cut -d= -f2)
+  p=$(echo "$n" | cut -d_ -f1)
+  l=$(echo "$n" | cut -d_ -f2)
+  r=$(echo "$n" | cut -d_ -f3)
+  socat "$p-LISTEN:$l,fork,reuseaddr" "$p:$t:$r" &
+done
+wait
