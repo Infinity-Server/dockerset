@@ -1,18 +1,40 @@
 ARG ND_VER=latest
 
 #####################################################
+### build taglib
+FROM public.ecr.aws/docker/library/alpine:3.21 AS taglib
+ARG TARGETPLATFORM
+ARG CROSS_TAGLIB_VERSION=2.0.2-1
+ENV CROSS_TAGLIB_RELEASES_URL=https://github.com/navidrome/cross-taglib/releases/download/v${CROSS_TAGLIB_VERSION}/
+RUN <<EOT
+    PLATFORM=$(echo ${TARGETPLATFORM} | tr '/' '-')
+    FILE=taglib-${PLATFORM}.tar.gz
+
+    DOWNLOAD_URL=${CROSS_TAGLIB_RELEASES_URL}${FILE}
+    wget ${DOWNLOAD_URL}
+
+    mkdir /taglib
+    tar -xzf ${FILE} -C /taglib
+EOT
+
+#####################################################
 ### build navidrome
-FROM deluan/ci-goreleaser AS builder
+FROM public.ecr.aws/docker/library/golang:1.23-bookworm AS builder
+RUN apt update -y && apt install -y binutils gcc g++ libc6-dev zlib1g-dev
 ARG ND_VER=latest
 WORKDIR /go/src
-COPY . /go/src/navidrome
-RUN cd /go/src/navidrome && \
-    go get github.com/navidrome/navidrome@v$ND_VER && \
-    go mod tidy && \
-    go build \
-        -a -v \
-        -gcflags="all=-l" \
-        -ldflags="-extldflags -static -X github.com/navidrome/navidrome/consts.gitSha=SpringHack -X github.com/navidrome/navidrome/consts.gitTag=$ND_VER"
+COPY . /go/src/main
+RUN --mount=from=taglib,target=/taglib,src=/taglib,ro <<EOT
+    git clone https://github.com/navidrome/navidrome /go/src/navidrome
+    cd /go/src/navidrome
+    cp -rvf /go/src/main/main.go ./main.go
+    export CGO_ENABLED=1
+    export PKG_CONFIG_PATH=/taglib/lib/pkgconfig
+    go mod tidy
+    go build -a -v -tags=netgo -gcflags="all=-l" -ldflags="-extldflags '-static -latomic' -w -s \
+      -X github.com/navidrome/navidrome/consts.gitSha=SpringHack \
+      -X github.com/navidrome/navidrome/consts.gitTag=$ND_VER"
+EOT
 
 #####################################################
 ### build gorip

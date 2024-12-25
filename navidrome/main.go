@@ -14,11 +14,12 @@ import (
   "github.com/navidrome/navidrome/cmd"
   "github.com/navidrome/navidrome/log"
   "github.com/navidrome/navidrome/model"
+	"github.com/navidrome/navidrome/conf/buildtags"
   "github.com/navidrome/navidrome/scanner/metadata"
 )
 
 func FakeLyrics(t metadata.Tags) string {
-  log.Info("DOSK", "func", "metadata.Tags.Lyrics")
+  log.Debug("Hook fired", "func", "metadata.Tags.Lyrics")
 
   lyrics := RealLyrics(t)
   mediaFile := t.FilePath()
@@ -54,7 +55,7 @@ func RealLyrics(metadata.Tags) string {
 }
 
 func FakeNewTag(filePath string, fileInfo os.FileInfo, tags metadata.ParsedTags) metadata.Tags {
-  log.Info("DOSK", "func", "metadata.NewTag")
+  log.Debug("Hook fired", "func", "metadata.NewTag")
   t := RealNewTag(filePath, fileInfo, tags)
   gohook.HookMethod(t, "Lyrics", FakeLyrics, RealLyrics)
   return t
@@ -69,7 +70,7 @@ type FakeFS struct {
 }
 
 func (f FakeFS) Open(name string) (fs.File, error) {
-  log.Info("DOSK", "func", "fs.FS.Open")
+  log.Debug("Hook fired", "func", "fs.FS.Open")
   dirFS := os.DirFS(f.Dir)
   return dirFS.Open(name)
 }
@@ -78,13 +79,16 @@ func FakeBuildAssets() fs.FS {
   exe, _ := os.Executable()
   exeDir := filepath.Dir(exe)
   buildDir := filepath.Join(exeDir, "build")
-  log.Info("DOSK", "func", "ui.BuildAssets")
+  log.Debug("Use fake fs for frontend", "func", "ui.BuildAssets")
   return FakeFS{
     Dir: buildDir,
   }
 }
 
+//goland:noinspection GoBoolExpressions
 func main() {
+	_ = buildtags.NETGO
+
   gohook.Hook(ui.BuildAssets, FakeBuildAssets, nil)
   gohook.Hook(metadata.NewTag, FakeNewTag, RealNewTag)
   cmd.Execute()
