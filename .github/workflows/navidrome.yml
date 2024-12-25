@@ -6,6 +6,10 @@ on:
     paths:
       - .github/workflows/navidrome.yml
       - navidrome/**
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - sync_navidrome
 jobs:
   navidrome:
     runs-on: ubuntu-latest
@@ -34,7 +38,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
           build-args: |
-            ND_VER=0.53.2
+            ND_VER=${{ github.event.client_payload.ND_VER || '0.53.0' }}
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:
