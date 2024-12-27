@@ -47,4 +47,4 @@ http://:${WEB_PORT} {
 EOF
 fi
 
-exec s6-setuidgid root /caddy run --config /config/caddy/Caddyfile
+exec s6-setuidgid abc /caddy run --config /config/caddy/Caddyfile

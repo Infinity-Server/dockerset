@@ -34,7 +34,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.job }}:buildcache,mode=max
           build-args: |
-            VUE_TORRENT_VERSION=1.8.0
+            VUE_TORRENT_VERSION=2.19.0
       - name: Push Docker Description
         uses: peter-evans/dockerhub-description@v2
         with:
