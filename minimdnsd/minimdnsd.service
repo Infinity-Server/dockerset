@@ -1,0 +1,10 @@
+[Unit]
+Description=minimdnsd server
+
+[Service]
+Type=simple
+ExecStart=minimdnsd -r -4
+
+
+[Install]
+WantedBy=multi-user.target
