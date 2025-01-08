@@ -1,0 +1,3 @@
+initStatements:
+  - CREATE TABLE storage (id TEXT PRIMARY KEY, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, name TEXT, data TEXT)
+  - CREATE INDEX idx_time ON storage(time);

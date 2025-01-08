@@ -1,0 +1,155 @@
+/*
+ *  Author: SpringHack - springhack@live.cn
+ *  Last modified: 2025-01-08 16:54:52
+ *  Filename: index.css
+ *  Description: Created by SpringHack using vim automatically.
+ */
+@media (prefers-color-scheme: dark) {
+  body {
+    filter: invert(1);
+  }
+}
+
+@media (max-aspect-ratio: 7/9) {
+  .main {
+    flex-direction: column-reverse;
+  }
+  .right {
+    height: 10vh !important;
+  }
+  .left {
+    width: 100vw !important;
+    height: 90vh !important;
+  }
+}
+
+.main {
+  display: flex;
+}
+
+.left {
+  width: 20rem;
+  height: 100vh;
+  display: flex;
+  min-width: 20rem;
+  overflow-y: hidden;
+  flex-direction: column;
+  padding: 1rem 1rem 0 1rem;
+  border-right: 1px #ececec solid;
+  background-color: rgb(245, 246, 247);
+}
+
+.right {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.title {
+  flex: 1;
+  font-size: 2rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.header {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.new {
+  padding: 1rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.list {
+  overflow-y: scroll;
+}
+
+.visible-ref {
+  display: flex;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.spinner-grow {
+  width: 1rem;
+  height: 1rem;
+  text-align: center;
+}
+
+.search-box {
+  width: 50%;
+  cursor: pointer;
+  text-align: center;
+  background: #dadada;
+  border-radius: 0.5rem;
+  border: 1px #dddddd solid;
+}
+
+.search-title {
+  width: 3rem;
+  height: 3rem;
+  padding: 1rem 0;
+}
+
+.search-list {
+  width: 100%;
+  padding-top: .5rem;
+  transition: .5s all;
+}
+
+.l-group-item {
+  display: flex;
+  cursor: pointer;
+  position: relative;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+}
+
+.l-group-item:hover {
+  border-radius: 0.5rem;
+  background-color: rgb(228, 230, 231);
+}
+
+.list-title {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 1rem 0 0.5rem;
+}
+
+.list-remove {
+  opacity: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  right: 0.5rem;
+  padding: 0.1rem;
+  position: absolute;
+  transition: .4s all;
+  border-radius: 0.4rem;
+}
+
+.list-remove:hover {
+  background-color: rgb(209, 212, 210);
+}
+
+.l-group-item:hover .list-remove {
+  opacity: 1;
+}
+
+img {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.6;
+}
+
+#search-input {
+  text-align: center;
+}

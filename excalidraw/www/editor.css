@@ -1,0 +1,25 @@
+/*
+ *  Author: SpringHack - springhack@live.cn
+ *  Last modified: 2025-01-08 14:01:54
+ *  Filename: editor.css
+ *  Description: Created by SpringHack using vim automatically.
+ */
+html, body {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.main {
+  width: 100vw;
+  height: 100vh;
+}
+
+.line {
+  margin: 0.4rem;
+  border: 0.005rem #e2e2e2 solid
+}
+
+.change-name {
+  margin-left: .6em;
+}
