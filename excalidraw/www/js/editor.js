@@ -1,11 +1,13 @@
 /*
  *  Author: SpringHack - springhack@live.cn
- *  Last modified: 2025-01-08 17:30:57
- *  Filename: editor.js
+ *  Last modified: 2025-01-09 19:52:52
+ *  Filename: js/editor.js
  *  Description: Created by SpringHack using vim automatically.
  */
+import * as ExcalidrawLib from '../vendor/excalidraw/index.js';
+
 const { createRoot } = ReactDOM;
-const { useRef, useState, useEffect, createElement } = React;
+const { useState, useEffect, createElement } = React;
 const { Footer, Sidebar, Excalidraw } = ExcalidrawLib;
 
 const app = document.querySelector('#app');
@@ -32,14 +34,17 @@ const ExcalidrawApp = () => {
     if (!excalidrawAPI) return;
     const libraryUrl = new URLSearchParams(location.hash.slice(1)).get('addLibrary');
     if (!libraryUrl) return;
-    const libraryItems = fetch(libraryUrl).then(res => res.blob())
-    excalidrawAPI.updateLibrary({
-      libraryItems,
-      prompt: false,
-      merge: true,
-      defaultStatus: 'published',
-      openLibraryMenu: true
-    });
+    fetch(libraryUrl)
+      .then(res => res.blob())
+      .then((libraryItems) => {
+        excalidrawAPI.updateLibrary({
+          libraryItems,
+          prompt: false,
+          merge: true,
+          defaultStatus: 'published',
+          openLibraryMenu: true
+        });
+      });
   }, [excalidrawAPI]);
   useEffect(() => {
     getDocument(id).then((doc) => {
@@ -76,9 +81,11 @@ const ExcalidrawApp = () => {
       init === null
         ? null
         : createElement(Excalidraw, {
+          name,
           theme: window.matchMedia("(prefers-color-scheme: dark)").matches && ExcalidrawLib.THEME.DARK || ExcalidrawLib.THEME.LIGHT,
           excalidrawAPI: (api) => setExcalidrawAPI(api),
           initialData: init,
+          handleKeyboardGlobally: true,
           UIOptions: {
             canvasActions: {
               export: false,

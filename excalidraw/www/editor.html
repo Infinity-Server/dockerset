@@ -9,15 +9,17 @@
   <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
     <title>Excalidraw</title>
-    <script>window.EXCALIDRAW_ASSET_PATH = 'vendor/';</script>
+    <script>
+      window.EXCALIDRAW_ASSET_PATH = (new URL('vendor/excalidraw/excalidraw-assets/', location.href)).toString();
+    </script>
     <script src="vendor/react.production.min.js"></script>
     <script src="vendor/react-dom.production.min.js"></script>
-    <script src="vendor/excalidraw.production.min.js"></script>
     <link rel="stylesheet" href="css/editor.css" />
+    <link rel="stylesheet" href="vendor/excalidraw/index.css" />
   </head>
   <body>
     <div id="app"></div>
   </body>
   <script src="js/common.js"></script>
-  <script src="js/editor.js"></script>
+  <script type="module" src="js/editor.js"></script>
 </html>
