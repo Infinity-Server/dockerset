@@ -1,7 +1,7 @@
 /*
  *  Author: SpringHack - springhack@live.cn
- *  Last modified: 2025-01-08 17:55:13
- *  Filename: common.js
+ *  Last modified: 2025-01-09 14:00:45
+ *  Filename: js/common.js
  *  Description: Created by SpringHack using vim automatically.
  */
 const createDocument = async () => {
@@ -62,7 +62,7 @@ const getList = async (offset, count) => {
       resultFormat: 'map',
       transaction: [
         {
-          query: 'SELECT * from storage ORDER BY time DESC LIMIT :count OFFSET :offset',
+          query: 'SELECT id, name from storage ORDER BY time DESC LIMIT :count OFFSET :offset',
           values: {
             count,
             offset
@@ -84,7 +84,7 @@ const searchList = async (keyword, count) => {
       resultFormat: 'map',
       transaction: [
         {
-          query: 'SELECT * from storage WHERE name like :keyword ORDER BY time DESC LIMIT :count',
+          query: 'SELECT id, name from storage WHERE name like :keyword ORDER BY time DESC LIMIT :count',
           values: {
             count,
             keyword: `%${keyword}%`

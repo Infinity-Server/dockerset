@@ -1,7 +1,7 @@
 /*
  *  Author: SpringHack - springhack@live.cn
- *  Last modified: 2025-01-08 17:04:00
- *  Filename: index.js
+ *  Last modified: 2025-01-09 10:44:37
+ *  Filename: www/js/index.js
  *  Description: Created by SpringHack using vim automatically.
  */
 const { createRoot } = ReactDOM;
@@ -18,7 +18,7 @@ const openEditor = async (id) => {
   if (!id) {
     id = await createDocument();
   }
-  window.open(`editor.html?id=${encodeURIComponent(id)}`);
+  window.open(`editor.html?id=${encodeURIComponent(id)}`, id);
 };
 
 const removeDocument = async (id, event) => {
@@ -66,9 +66,9 @@ const Nav = () => {
     createElement('div', { className: 'l-group' }, [
       ...list.map((item) => {
         return createElement('div', { className: 'l-group-item', onClick: openEditor.bind(null, item.id) }, [
-          createElement('img', { src: 'doc.svg' }),
+          createElement('img', { src: 'img/doc.svg' }),
           createElement('div', { className: 'list-title' }, item.name),
-          createElement('img', { className: 'list-remove', src: 'del.svg', onClick: removeDocument.bind(null, item.id) })
+          createElement('img', { className: 'list-remove', src: 'img/del.svg', onClick: removeDocument.bind(null, item.id) })
         ])
       })
     ]),
@@ -96,8 +96,15 @@ const Search = () => {
       setList(items);
     });
   }, [keyword]);
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        document.querySelector('#search-input').focus();
+      }, 100);
+    }
+  }, [open]);
   return createElement('div', { className: 'search-box', onClick: () => setOpen(true) }, [
-    createElement('img', { src: 'search.svg', className: 'search-title' }),
+    createElement('img', { src: 'img/search.svg', className: 'search-title' }),
     createElement(Modal, { show: open, onHide: () => setOpen(false) }, [
       createElement(Modal.Header, {}, [
         createElement(Form.Control, { id: 'search-input', type: 'text', muted: true, onChange })
@@ -106,9 +113,9 @@ const Search = () => {
         createElement('div', { className: 'search-list l-group' }, [
           ...list.map((item) => {
             return createElement('div', { className: 'l-group-item', onClick: openEditor.bind(null, item.id) }, [
-              createElement('img', { src: 'doc.svg' }),
+              createElement('img', { src: 'img/doc.svg' }),
               createElement('div', { className: 'list-title' }, item.name),
-              createElement('img', { className: 'list-remove', src: 'del.svg', onClick: removeDocument.bind(null, item.id) })
+              createElement('img', { className: 'list-remove', src: 'img/del.svg', onClick: removeDocument.bind(null, item.id) })
             ])
           })
         ])
