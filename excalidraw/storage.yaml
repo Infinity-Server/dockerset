@@ -1,3 +1,20 @@
+disableWALMode: true
+useOnlyStoredStatements: true
 initStatements:
   - CREATE TABLE storage (id TEXT PRIMARY KEY, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, name TEXT, data TEXT)
   - CREATE INDEX idx_time ON storage(time);
+storedStatements:
+  - id: GET_LIST
+    sql: SELECT id, name from storage ORDER BY time DESC LIMIT :count OFFSET :offset
+  - id: CREATE_DOCUMENT
+    sql: INSERT INTO storage (id, name, data) VALUES (:id, :name, '{}')
+  - id: DELETE_DOCUMENT
+    sql: DELETE FROM storage WHERE id = :id
+  - id: SEARCH_LIST
+    sql: SELECT id, name from storage WHERE name like :keyword ORDER BY time DESC LIMIT :count
+  - id: UPDATE_DOCUMENT_NAME
+    sql: UPDATE storage SET time = CURRENT_TIMESTAMP, name = :name WHERE id = :id
+  - id: UPDATE_DOCUMENT_DATA
+    sql: UPDATE storage SET time = CURRENT_TIMESTAMP, data = :data WHERE id = :id
+  - id: GET_DOCUMENT
+    sql: SELECT * from storage WHERE id = :id

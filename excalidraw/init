@@ -2,11 +2,7 @@
 
 if [ ! -e /excalidraw/storage/storage.yaml ];
 then
-cat > /excalidraw/storage/storage.yaml <<EOF
-initStatements:
-  - CREATE TABLE storage (id TEXT PRIMARY KEY, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, name TEXT, data TEXT)
-  - CREATE INDEX idx_time ON storage(time);
-EOF
+  cp -rvf /excalidraw/storage.yaml /excalidraw/storage/storage.yaml
 fi
 
-exec /ws4sqlite $@
+exec /excalidraw/ws4sqlite $@
