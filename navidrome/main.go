@@ -9,6 +9,7 @@ import (
 
   _ "net/http/pprof" //nolint:gosec
 
+	"github.com/spf13/viper"
   "github.com/brahma-adshonor/gohook"
   "github.com/navidrome/navidrome/ui"
   "github.com/navidrome/navidrome/cmd"
@@ -17,6 +18,10 @@ import (
 	"github.com/navidrome/navidrome/conf/buildtags"
   "github.com/navidrome/navidrome/scanner/metadata"
 )
+
+func init() {
+	viper.BindEnv("dbpath")
+}
 
 func FakeLyrics(t metadata.Tags) string {
   log.Debug("Hook fired", "func", "metadata.Tags.Lyrics")
