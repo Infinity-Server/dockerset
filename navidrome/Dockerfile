@@ -25,7 +25,7 @@ ARG ND_VER=latest
 WORKDIR /go/src
 COPY . /go/src/main
 RUN --mount=from=taglib,target=/taglib,src=/taglib,ro <<EOT
-    git clone https://github.com/navidrome/navidrome /go/src/navidrome
+    git clone -b v$ND_VER https://github.com/navidrome/navidrome /go/src/navidrome
     cd /go/src/navidrome
     cp -rvf /go/src/main/main.go ./main.go
     export CGO_ENABLED=1
