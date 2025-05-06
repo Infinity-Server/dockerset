@@ -19,7 +19,7 @@ EOT
 
 #####################################################
 ### build navidrome
-FROM public.ecr.aws/docker/library/golang:1.23-bookworm AS builder
+FROM public.ecr.aws/docker/library/golang:1.24-bookworm AS builder
 RUN apt update -y && apt install -y binutils gcc g++ libc6-dev zlib1g-dev
 ARG ND_VER=latest
 WORKDIR /go/src
@@ -27,7 +27,7 @@ COPY . /go/src/main
 RUN --mount=from=taglib,target=/taglib,src=/taglib,ro <<EOT
     git clone -b v$ND_VER https://github.com/navidrome/navidrome /go/src/navidrome
     cd /go/src/navidrome
-    cp -rvf /go/src/main/main.go ./main.go
+    cp -rvf /go/src/main/hook.go hook.go
     export CGO_ENABLED=1
     export PKG_CONFIG_PATH=/taglib/lib/pkgconfig
     go mod tidy
@@ -38,7 +38,7 @@ EOT
 
 #####################################################
 ### build gorip
-FROM golang:1.23.1-bookworm AS gorip
+FROM golang:1.24.1-bookworm AS gorip
 WORKDIR /code
 RUN apt update -y && apt install -y git
 RUN git clone https://github.com/woesbot/gorip && cd gorip && go build
