@@ -1,15 +1,29 @@
+# Build Xmin
+FROM ubuntu:24.04 AS Xmin
+
+# Install deps
+RUN \
+  apt-get update && \
+  DEBIAN_FRONTEND=noninteractive \
+  apt-get install --no-install-recommends -y \
+    build-essential libx11-dev libgtk-3-dev
+
+# Build Xmin
+COPY Xmin.c /Xmin.c
+RUN gcc -shared -fPIC -o /libXmin.so /Xmin.c -ldl -lX11
+
 # Pull the baseimage
 FROM jlesage/baseimage-gui:ubuntu-24.04-v4.10.6
 
-# Install  orcaslicer
+# Install orcaslicer
 RUN \
   echo "**** install packages ****" && \
   apt-get update && \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install --no-install-recommends -y \
     curl \
-    firefox \
     locales-all \
+    ca-certificates \
     gstreamer1.0-alsa \
     gstreamer1.0-gl \
     gstreamer1.0-gtk3 \
@@ -49,8 +63,10 @@ RUN \
     /var/tmp/* \
     /tmp/*
 
-# Copy the start script
+# App run stuff
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 COPY startapp.sh /startapp.sh
+COPY --from=Xmin /libXmin.so /libXmin.so
 
 # Set the application name
 RUN set-cont-env APP_NAME "OrcaSlicer"
