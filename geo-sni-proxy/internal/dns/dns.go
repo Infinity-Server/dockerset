@@ -106,6 +106,17 @@ func EnsureHostsAndResolv() (string, error) {
 func StartServer(m *geosite.Matcher, upstream string, addr string) {
 	udp := &mdns.Server{Addr: addr, Net: "udp"}
 	tcp := &mdns.Server{Addr: addr, Net: "tcp"}
+	var ipA = net.IPv4(127, 0, 0, 1)
+	if envEnabled("GEO_SNI_PROXY_BYPASS") {
+		if bp := findBypassIP(); bp != nil {
+			if v4 := bp.To4(); v4 != nil {
+				ipA = v4
+			}
+			logx.Printf("dns_bypass_enabled ip=%s", ipA.String())
+		} else {
+			logx.Printf("dns_bypass_enabled ip=none")
+		}
+	}
 	logx.Printf("dns_listen start udp=%s tcp=%s upstream=%s", addr, addr, upstream)
 	mdns.HandleFunc(".", func(w mdns.ResponseWriter, r *mdns.Msg) {
 		up := queryUpstreamMsg(upstream, r)
@@ -120,52 +131,7 @@ func StartServer(m *geosite.Matcher, upstream string, addr string) {
 			resp.Ns = append(resp.Ns, up.Ns...)
 			resp.Extra = append(resp.Extra, up.Extra...)
 		}
-		changed := false
-		var out []mdns.RR
-		for _, rr := range resp.Answer {
-			h := rr.Header()
-			name := strings.TrimSuffix(h.Name, ".")
-			if m.Match(name) {
-				switch h.Rrtype {
-				case mdns.TypeA:
-					changed = true
-					out = append(out, &mdns.A{
-						Hdr: mdns.RR_Header{Name: h.Name, Rrtype: mdns.TypeA, Class: mdns.ClassINET, Ttl: h.Ttl},
-						A:   net.IPv4(127, 0, 0, 1),
-					})
-					continue
-				case mdns.TypeAAAA:
-					changed = true
-					// drop AAAA
-					continue
-				case mdns.TypeCNAME:
-					changed = true
-					out = append(out, &mdns.CNAME{
-						Hdr:    mdns.RR_Header{Name: h.Name, Rrtype: mdns.TypeCNAME, Class: mdns.ClassINET, Ttl: h.Ttl},
-						Target: "localhost.",
-					})
-					hasLocalhostA := false
-					for _, ex := range resp.Extra {
-						if ah := ex.Header(); ah.Rrtype == mdns.TypeA && strings.EqualFold(ah.Name, "localhost.") {
-							hasLocalhostA = true
-							break
-						}
-					}
-					if !hasLocalhostA {
-						resp.Extra = append(resp.Extra, &mdns.A{
-							Hdr: mdns.RR_Header{Name: "localhost.", Rrtype: mdns.TypeA, Class: mdns.ClassINET, Ttl: 60},
-							A:   net.IPv4(127, 0, 0, 1),
-						})
-					}
-					continue
-				case mdns.TypeHTTPS, mdns.TypeSVCB:
-					changed = true
-					// drop HTTPS/SVCB
-					continue
-				}
-			}
-			out = append(out, rr)
-		}
+		out, changed := rewriteAnswers(func(s string) bool { return m.Match(s) }, resp.Answer, ipA)
 		if changed {
 			resp.Answer = out
 			resp.MsgHdr.Rcode = mdns.RcodeSuccess
@@ -175,6 +141,91 @@ func StartServer(m *geosite.Matcher, upstream string, addr string) {
 	go func() { _ = udp.ListenAndServe() }()
 	go func() { _ = tcp.ListenAndServe() }()
 	select {}
+}
+
+func rewriteAnswers(match func(string) bool, answers []mdns.RR, ipA net.IP) ([]mdns.RR, bool) {
+	changed := false
+	var out []mdns.RR
+	for _, rr := range answers {
+		h := rr.Header()
+		name := strings.TrimSuffix(h.Name, ".")
+		if match(name) {
+			switch h.Rrtype {
+			case mdns.TypeA:
+				changed = true
+				out = append(out, &mdns.A{
+					Hdr: mdns.RR_Header{Name: h.Name, Rrtype: mdns.TypeA, Class: mdns.ClassINET, Ttl: h.Ttl},
+					A:   ipA,
+				})
+				continue
+			case mdns.TypeAAAA:
+				changed = true
+				continue
+			case mdns.TypeCNAME:
+				changed = true
+				out = append(out, &mdns.A{
+					Hdr: mdns.RR_Header{Name: h.Name, Rrtype: mdns.TypeA, Class: mdns.ClassINET, Ttl: h.Ttl},
+					A:   ipA,
+				})
+				continue
+			case mdns.TypeHTTPS, mdns.TypeSVCB:
+				changed = true
+				continue
+			}
+		}
+		out = append(out, rr)
+	}
+	return out, changed
+}
+
+func envEnabled(name string) bool {
+	s := strings.ToLower(strings.TrimSpace(os.Getenv(name)))
+	switch s {
+	case "1", "true", "yes", "on", "enable", "enabled":
+		return true
+	default:
+		return false
+	}
+}
+
+func findBypassIP() net.IP {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+	for _, inf := range ifaces {
+		if (inf.Flags&net.FlagUp) == 0 || (inf.Flags&net.FlagLoopback) != 0 {
+			continue
+		}
+		addrs, err := inf.Addrs()
+		if err != nil {
+			continue
+		}
+		if ip := chooseBypassIPv4FromAddrs(addrs); ip != nil {
+			return ip
+		}
+	}
+	return nil
+}
+
+func chooseBypassIPv4FromAddrs(addrs []net.Addr) net.IP {
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok {
+			ip := ipnet.IP
+			if ip == nil {
+				continue
+			}
+			v4 := ip.To4()
+			if v4 == nil {
+				continue
+			}
+			if v4.IsLoopback() || v4.IsUnspecified() || v4.IsLinkLocalUnicast() {
+				continue
+			}
+			return v4
+		}
+	}
+	return nil
 }
 
 // queryUpstream forwards a single question to the upstream resolver.
