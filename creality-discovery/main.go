@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -10,13 +12,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/mdns"
+	"github.com/grandcat/zeroconf"
 )
 
 type Config struct {
 	TargetService string
-	ProxyPorts    []string      // Format: "4408,8000"
+	ProxyPorts    []string
 	ScanInterval  time.Duration
+	BindIface     string
 }
 
 var (
@@ -25,141 +28,132 @@ var (
 	cfg       Config
 )
 
+func info(format string, v ...interface{}) {
+	ts := time.Now().Format("2006/01/02 15:04:05")
+	fmt.Printf("%s [INFO] "+format+"\n", append([]interface{}{ts}, v...)...)
+}
+
 func init() {
+	log.SetOutput(io.Discard) // 彻底禁言标准库
 	cfg = Config{
-		TargetService: getEnv("TARGET_SERVICE", "_Creality-1234567890ABCD._udp"),
-		ProxyPorts:    strings.Split(getEnv("PROXY_PORTS", "4408,8000"), ","),
-		ScanInterval:  time.Duration(getEnvInt("SCAN_INTERVAL_SEC", 30)) * time.Second,
+		TargetService: fmt.Sprintf("_Creality-%s._udp", getEnv("CR_SN", "1234567890ABCD")),
+		BindIface:     getEnv("CR_IFACE", "host0"),
+		ProxyPorts:    strings.Split(getEnv("CR_PORTS", "4408,8000"), ","),
+		ScanInterval:  time.Duration(getEnvInt("CR_INTERVAL", 10)) * time.Second,
 	}
 }
 
 func main() {
-	// Start mDNS discovery
-	go scannerLoop()
+	info("Starting zeroconf engine on %s", cfg.BindIface)
 
-	// Start a TCP listener for every configured port
+	// 启动发现引擎
+	go discoveryLoop()
+
+	// 启动代理
 	for _, port := range cfg.ProxyPorts {
 		p := strings.TrimSpace(port)
-		if p == "" {
-			continue
+		if p != "" {
+			go startProxy(p)
 		}
-		go startProxy(p)
 	}
 
-	// Keep main alive
 	select {}
 }
 
-func scannerLoop() {
-	log.Printf("Discovery started for service: %s", cfg.TargetService)
+func discoveryLoop() {
 	for {
-		scan()
+		// 每次扫描都重新寻找网卡，应对 K8S 网络抖动
+		iface, err := net.InterfaceByName(cfg.BindIface)
+		if err != nil {
+			info("Wait for interface %s...", cfg.BindIface)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		// 创建 Resolver，强制绑定网卡
+		resolver, err := zeroconf.NewResolver(zeroconf.SelectIfaces([]net.Interface{*iface}))
+		if err != nil {
+			info("Failed to create resolver: %v", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		entries := make(chan *zeroconf.ServiceEntry)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+		go func(results <-chan *zeroconf.ServiceEntry) {
+			for entry := range results {
+				// 提取 IPv4
+				if len(entry.AddrIPv4) > 0 {
+					ip := entry.AddrIPv4[0].String()
+					mu.Lock()
+					if currentIP != ip {
+						currentIP = ip
+						info("Zeroconf found printer: %s -> %s", entry.Instance, currentIP)
+					}
+					mu.Unlock()
+				}
+			}
+		}(entries)
+
+		// 开始浏览服务
+		err = resolver.Browse(ctx, cfg.TargetService, "local.", entries)
+		if err != nil {
+			info("Browse error: %v", err)
+		}
+
+		<-ctx.Done()
+		cancel()
 		time.Sleep(cfg.ScanInterval)
 	}
 }
 
-func scan() {
-	ifaces, _ := net.Interfaces()
-	entriesCh := make(chan *mdns.ServiceEntry, 10)
-
-	go func() {
-		for entry := range entriesCh {
-			if strings.Contains(entry.Name, cfg.TargetService) && entry.AddrV4 != nil {
-				ip := entry.AddrV4.String()
-				if ip == "0.0.0.0" {
-					continue
-				}
-				mu.Lock()
-				if currentIP != ip {
-					currentIP = ip
-					log.Printf("Target IP Updated: %s", currentIP)
-				}
-				mu.Unlock()
-			}
-		}
-	}()
-
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
-			continue
-		}
-		params := &mdns.QueryParam{
-			Service:             cfg.TargetService,
-			Domain:              "local",
-			Timeout:             time.Second * 2,
-			Entries:             entriesCh,
-			WantUnicastResponse: false,
-			Interface:           &iface,
-		}
-		_ = mdns.Query(params)
-	}
-	close(entriesCh)
-}
+// --- 以下是 Proxy 部分，保持不变 ---
 
 func startProxy(port string) {
-	listener, err := net.Listen("tcp", ":"+port)
+	l, err := net.Listen("tcp", "0.0.0.0:"+port)
 	if err != nil {
-		log.Fatalf("Failed to bind port %s: %v", port, err)
+		fmt.Printf("Fatal bind %s: %v\n", port, err)
+		os.Exit(1)
 	}
-	log.Printf("Proxy listening on port %s", port)
-
+	info("Proxy relay ready on port %s", port)
 	for {
-		clientConn, err := listener.Accept()
-		if err != nil {
-			log.Printf("Accept error on port %s: %v", port, err)
-			continue
+		c, err := l.Accept()
+		if err == nil {
+			go handleRelay(c, port)
 		}
-
-		go handleConnection(clientConn, port)
 	}
 }
 
-func handleConnection(clientConn net.Conn, port string) {
-	defer clientConn.Close()
-
+func handleRelay(src net.Conn, port string) {
+	defer src.Close()
 	mu.RLock()
-	targetHost := currentIP
+	target := currentIP
 	mu.RUnlock()
-
-	if targetHost == "" {
-		log.Printf("Connection rejected on port %s: Target IP unknown", port)
+	if target == "" {
 		return
 	}
-
-	// Dial the printer
-	targetAddr := net.JoinHostPort(targetHost, port)
-	backendConn, err := net.DialTimeout("tcp", targetAddr, 5*time.Second)
+	dst, err := net.DialTimeout("tcp", net.JoinHostPort(target, port), 3*time.Second)
 	if err != nil {
-		log.Printf("Failed to connect to printer at %s: %v", targetAddr, err)
 		return
 	}
-	defer backendConn.Close()
-
-	// Full-duplex proxy
+	defer dst.Close()
 	done := make(chan struct{}, 2)
-	go func() {
-		_, _ = io.Copy(backendConn, clientConn)
-		done <- struct{}{}
-	}()
-	go func() {
-		_, _ = io.Copy(clientConn, backendConn)
-		done <- struct{}{}
-	}()
-
+	go func() { io.Copy(dst, src); done <- struct{}{} }()
+	go func() { io.Copy(src, dst); done <- struct{}{} }()
 	<-done
 }
 
-// Helpers
 func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
+	if v, ok := os.LookupEnv(key); ok {
+		return v
 	}
 	return fallback
 }
 
 func getEnvInt(key string, fallback int) int {
-	if value, ok := os.LookupEnv(key); ok {
-		if i, err := strconv.Atoi(value); err == nil {
+	if v, ok := os.LookupEnv(key); ok {
+		if i, err := strconv.Atoi(v); err == nil {
 			return i
 		}
 	}

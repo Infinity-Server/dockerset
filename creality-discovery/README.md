@@ -1,6 +1,7 @@
 # Auto Discovery Creality Device And Forward TCP
 
 ### Config Envs
-- `TARGET_SERVICE`: service name, eg: `_Creality-1234567890ABCD._udp`
-- `PROXY_PORTS`: tcp ports to forward, eg: `4408,8000`
-- `SCAN_INTERVAL_SEC`: how often to scan, eg: `30`
+- `CR_SN`: printer sn, eg: `1234567890ABCD`
+- `CR_IFACE`: which network interface to scan
+- `CR_PORTS`: tcp ports to forward, eg: `4408,8000`
+- `CR_INTERVAL`: how often to scan, eg: `10`
