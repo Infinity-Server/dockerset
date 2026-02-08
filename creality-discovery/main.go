@@ -36,7 +36,7 @@ func info(format string, v ...interface{}) {
 func init() {
 	log.SetOutput(io.Discard) // 彻底禁言标准库
 	cfg = Config{
-		TargetService: fmt.Sprintf("_Creality-%s._udp", getEnv("CR_SN", "1234567890ABCD")),
+		TargetService: fmt.Sprintf("_Creality-%s._udp", getEnv("CR_ID", "1234567890ABCD")),
 		BindIface:     getEnv("CR_IFACE", "host0"),
 		ProxyPorts:    strings.Split(getEnv("CR_PORTS", "4408,8000"), ","),
 		ScanInterval:  time.Duration(getEnvInt("CR_INTERVAL", 10)) * time.Second,
