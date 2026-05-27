@@ -20,6 +20,7 @@ type Config struct {
 	ProxyPorts    []string
 	ScanInterval  time.Duration
 	BindIface     string
+	CameraEnabled bool
 }
 
 var (
@@ -38,8 +39,9 @@ func init() {
 	cfg = Config{
 		TargetService: fmt.Sprintf("_Creality-%s._udp", getEnv("CR_ID", "1234567890ABCD")),
 		BindIface:     getEnv("CR_IFACE", "host0"),
-		ProxyPorts:    strings.Split(getEnv("CR_PORTS", "4408,8000"), ","),
+		ProxyPorts:    strings.Split(getEnv("CR_PORTS", "4408"), ","),
 		ScanInterval:  time.Duration(getEnvInt("CR_INTERVAL", 10)) * time.Second,
+		CameraEnabled: getEnvBool("CR_CAMERA", true),
 	}
 }
 
@@ -53,8 +55,16 @@ func main() {
 	for _, port := range cfg.ProxyPorts {
 		p := strings.TrimSpace(port)
 		if p != "" {
+			if cfg.CameraEnabled && p == cameraPort {
+				info("Skip TCP proxy on port %s because CR_CAMERA is using it", p)
+				continue
+			}
 			go startProxy(p)
 		}
+	}
+
+	if cfg.CameraEnabled {
+		go startCameraServer()
 	}
 
 	select {}
@@ -155,6 +165,18 @@ func getEnvInt(key string, fallback int) int {
 	if v, ok := os.LookupEnv(key); ok {
 		if i, err := strconv.Atoi(v); err == nil {
 			return i
+		}
+	}
+	return fallback
+}
+
+func getEnvBool(key string, fallback bool) bool {
+	if v, ok := os.LookupEnv(key); ok {
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "1", "true", "yes", "y", "on", "enable", "enabled":
+			return true
+		case "0", "false", "no", "n", "off", "disable", "disabled":
+			return false
 		}
 	}
 	return fallback

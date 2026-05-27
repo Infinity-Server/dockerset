@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Creality Camera</title>
+  <style>
+    body { margin: 0; background: #101214; color: #e8edf2; font: 14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+    header { height: 44px; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #1b2026; border-bottom: 1px solid #2b323a; }
+    canvas { width: 100%; height: calc(100vh - 45px); background: #050607; object-fit: contain; }
+    .status { color: #9fb0c0; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <strong>Creality Camera</strong>
+    <span id="status" class="status">starting</span>
+  </header>
+  <canvas id="video"></canvas>
+</main>
+<script>
+const statusEl = document.getElementById("status");
+const canvas = document.getElementById("video");
+const ctx = canvas.getContext("2d", { alpha: false });
+
+let decoder;
+let configured = false;
+let pending = [];
+let waitingForKey = true;
+let firstFrameAt = 0;
+let ws;
+
+function setStatus(text) {
+  statusEl.textContent = text;
+}
+
+function resize(frame) {
+  if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
+    canvas.width = frame.displayWidth;
+    canvas.height = frame.displayHeight;
+  }
+}
+
+function configure(codec) {
+  if (!("VideoDecoder" in window)) {
+    setStatus("WebCodecs VideoDecoder is not available");
+    return;
+  }
+
+  configured = false;
+  waitingForKey = true;
+  firstFrameAt = 0;
+  pending = [];
+  if (decoder) {
+    try { decoder.close(); } catch (_) {}
+  }
+
+  decoder = new VideoDecoder({
+    output(frame) {
+      resize(frame);
+      ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+      frame.close();
+      if (!firstFrameAt) {
+        firstFrameAt = Date.now();
+        setStatus("playing " + codec);
+      }
+    },
+    error(err) {
+      console.error(err);
+      setStatus("decoder error: " + err.message);
+    }
+  });
+
+  const config = { codec, optimizeForLatency: true, avc: { format: "annexb" } };
+  VideoDecoder.isConfigSupported(config).then((support) => {
+    if (!support.supported) {
+      setStatus("unsupported codec " + codec);
+      return;
+    }
+    decoder.configure(support.config);
+    configured = true;
+    setStatus("decoder ready " + codec);
+    for (const item of pending.splice(0)) decode(item);
+  }).catch((err) => {
+    console.error(err);
+    setStatus("config failed: " + err.message);
+  });
+}
+
+function decode(buf) {
+  if (!configured || !decoder || decoder.state !== "configured") {
+    pending.push(buf);
+    if (pending.length > 30) pending.shift();
+    return;
+  }
+  const view = new DataView(buf);
+  const timestamp = Number(view.getBigUint64(0));
+  const type = view.getUint8(8) ? "key" : "delta";
+  const data = new Uint8Array(buf, 9);
+  if (waitingForKey) {
+    if (type !== "key") {
+      setStatus("waiting for key frame");
+      return;
+    }
+    waitingForKey = false;
+  }
+  try {
+    decoder.decode(new EncodedVideoChunk({ type, timestamp, data }));
+  } catch (err) {
+    console.error(err);
+    setStatus("decode failed: " + err.message);
+    if (firstFrameAt && Date.now() - firstFrameAt >= 10000 && ws) {
+      configured = false;
+      try { decoder.close(); } catch (_) {}
+      decoder = undefined;
+      ws.close();
+    }
+  }
+}
+
+function connect() {
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(proto + "//" + location.host + location.pathname + location.search);
+  ws.binaryType = "arraybuffer";
+
+  ws.onopen = () => setStatus("websocket connected");
+  ws.onmessage = (event) => {
+    if (typeof event.data === "string") {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "config") configure(msg.codec);
+      return;
+    }
+    decode(event.data);
+  };
+  ws.onclose = () => {
+    setStatus("websocket closed, reconnecting");
+    configured = false;
+    if (decoder) {
+      try { decoder.close(); } catch (_) {}
+      decoder = undefined;
+    }
+    setTimeout(connect, 1000);
+  };
+  ws.onerror = () => setStatus("websocket error");
+}
+
+connect();
+</script>
+</body>
+</html>
