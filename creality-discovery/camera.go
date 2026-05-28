@@ -233,8 +233,9 @@ func runCameraReceiver(ctx context.Context, h *cameraHub) error {
 		return err
 	}
 
-	pliTicker := time.NewTicker(2 * time.Second)
+	pliTicker := time.NewTicker(200 * time.Millisecond)
 	defer pliTicker.Stop()
+	pliC := pliTicker.C
 
 	for {
 		select {
@@ -242,10 +243,12 @@ func runCameraReceiver(ctx context.Context, h *cameraHub) error {
 			return ctx.Err()
 		case err := <-done:
 			return err
-		case <-pliTicker.C:
+		case <-pliC:
 			ssrc := pliSSRC.Load()
 			if ssrc != 0 && h.count() > 0 {
 				_ = pc.WriteRTCP([]rtcp.Packet{&rtcp.PictureLossIndication{MediaSSRC: ssrc}})
+				pliTicker.Stop()
+				pliC = nil
 			}
 		}
 	}

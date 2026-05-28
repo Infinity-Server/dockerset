@@ -9,14 +9,21 @@
     main { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
     header { height: 44px; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #1b2026; border-bottom: 1px solid #2b323a; }
     canvas { width: 100%; height: calc(100vh - 45px); background: #050607; object-fit: contain; }
-    .status { color: #9fb0c0; }
+    .status { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .badge { border: 1px solid transparent; border-radius: 7px; padding: 3px 8px; font-size: 12px; line-height: 1.2; font-weight: 600; white-space: nowrap; }
+    .badge-info { color: #b8d7ff; background: #14263a; border-color: #254a72; }
+    .badge-wait { color: #ffe2a9; background: #352713; border-color: #6b4c1f; }
+    .badge-error { color: #ffc2c2; background: #3a171a; border-color: #7a2c32; }
+    .badge-codec { color: #bef7dc; background: #123127; border-color: #23664d; }
+    .badge-fps { color: #d8ccff; background: #282144; border-color: #51418a; }
+    .badge-title { color: #e8edf2; background: #252c34; border-color: #3a4653; }
   </style>
 </head>
 <body>
 <main>
   <header>
-    <strong>Creality Camera</strong>
-    <span id="status" class="status">starting</span>
+    <strong class="badge badge-title">creality camera</strong>
+    <span id="status" class="status"><span class="badge badge-info">starting</span></span>
   </header>
   <canvas id="video"></canvas>
 </main>
@@ -30,10 +37,32 @@ let configured = false;
 let pending = [];
 let waitingForKey = true;
 let firstFrameAt = 0;
+let renderQueue = [];
+let renderTimer = 0;
+let lastRenderedTS = 0;
+let estimatedIntervalMs = 66;
+let estimatedFPS = 15;
+let currentCodec = "";
 let ws;
 
-function setStatus(text) {
-  statusEl.textContent = text;
+function makeBadge(text, tone) {
+  const el = document.createElement("span");
+  el.className = "badge badge-" + tone;
+  el.textContent = text;
+  return el;
+}
+
+function setStatus(text, tone = "info") {
+  statusEl.replaceChildren(makeBadge(text, tone));
+}
+
+function setPlaybackStatus() {
+  const codec = (currentCodec || "unknown").toLowerCase();
+  const fps = firstFrameAt ? estimatedFPS.toFixed(1) : "--";
+  statusEl.replaceChildren(
+    makeBadge("codec=" + codec, "codec"),
+    makeBadge("fps=" + fps, "fps")
+  );
 }
 
 function resize(frame) {
@@ -43,49 +72,110 @@ function resize(frame) {
   }
 }
 
+function clearRenderQueue() {
+  if (renderTimer) {
+    clearTimeout(renderTimer);
+    renderTimer = 0;
+  }
+  for (const frame of renderQueue) {
+    try { frame.close(); } catch (_) {}
+  }
+  renderQueue = [];
+  lastRenderedTS = 0;
+  estimatedIntervalMs = 66;
+  estimatedFPS = 15;
+}
+
+function drawFrame(frame) {
+  resize(frame);
+  ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+  if (lastRenderedTS) {
+    const deltaMs = (frame.timestamp - lastRenderedTS) / 1000;
+    if (deltaMs >= 16 && deltaMs <= 250) {
+      estimatedIntervalMs = estimatedIntervalMs * 0.85 + deltaMs * 0.15;
+      estimatedFPS = 1000 / estimatedIntervalMs;
+    }
+  }
+  lastRenderedTS = frame.timestamp;
+  frame.close();
+  if (!firstFrameAt) {
+    firstFrameAt = Date.now();
+  }
+  setPlaybackStatus();
+}
+
+function scheduleRender() {
+  if (renderTimer || !renderQueue.length) return;
+
+  if (firstFrameAt && renderQueue.length < 2) return;
+
+  let delayMs = 0;
+  if (lastRenderedTS) {
+    const nextDeltaMs = (renderQueue[0].timestamp - lastRenderedTS) / 1000;
+    delayMs = nextDeltaMs >= 16 && nextDeltaMs <= 250 ? nextDeltaMs : estimatedIntervalMs;
+  }
+
+  renderTimer = setTimeout(() => {
+    renderTimer = 0;
+
+    while (renderQueue.length > 8) {
+      renderQueue.shift().close();
+    }
+    const next = renderQueue.shift();
+    if (next) drawFrame(next);
+
+    scheduleRender();
+  }, delayMs);
+}
+
+function enqueueFrame(frame) {
+  renderQueue.push(frame);
+  renderQueue.sort((a, b) => a.timestamp - b.timestamp);
+  while (renderQueue.length > 60) {
+    renderQueue.shift().close();
+  }
+  scheduleRender();
+}
+
 function configure(codec) {
   if (!("VideoDecoder" in window)) {
-    setStatus("WebCodecs VideoDecoder is not available");
+    setStatus("webcodecs videodecoder is not available", "error");
     return;
   }
 
   configured = false;
   waitingForKey = true;
   firstFrameAt = 0;
+  currentCodec = codec;
   pending = [];
+  clearRenderQueue();
   if (decoder) {
     try { decoder.close(); } catch (_) {}
   }
 
   decoder = new VideoDecoder({
     output(frame) {
-      resize(frame);
-      ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
-      frame.close();
-      if (!firstFrameAt) {
-        firstFrameAt = Date.now();
-        setStatus("playing " + codec);
-      }
+      enqueueFrame(frame);
     },
     error(err) {
       console.error(err);
-      setStatus("decoder error: " + err.message);
+      setStatus("decoder error: " + err.message, "error");
     }
   });
 
   const config = { codec, optimizeForLatency: true, avc: { format: "annexb" } };
   VideoDecoder.isConfigSupported(config).then((support) => {
     if (!support.supported) {
-      setStatus("unsupported codec " + codec);
+      setStatus("unsupported codec " + codec.toLowerCase(), "error");
       return;
     }
     decoder.configure(support.config);
     configured = true;
-    setStatus("decoder ready " + codec);
+    setPlaybackStatus();
     for (const item of pending.splice(0)) decode(item);
   }).catch((err) => {
     console.error(err);
-    setStatus("config failed: " + err.message);
+    setStatus("config failed: " + err.message, "error");
   });
 }
 
@@ -101,7 +191,7 @@ function decode(buf) {
   const data = new Uint8Array(buf, 9);
   if (waitingForKey) {
     if (type !== "key") {
-      setStatus("waiting for key frame");
+      setStatus("waiting for key frame", "wait");
       return;
     }
     waitingForKey = false;
@@ -110,7 +200,7 @@ function decode(buf) {
     decoder.decode(new EncodedVideoChunk({ type, timestamp, data }));
   } catch (err) {
     console.error(err);
-    setStatus("decode failed: " + err.message);
+    setStatus("decode failed: " + err.message, "error");
     if (firstFrameAt && Date.now() - firstFrameAt >= 10000 && ws) {
       configured = false;
       try { decoder.close(); } catch (_) {}
@@ -135,15 +225,16 @@ function connect() {
     decode(event.data);
   };
   ws.onclose = () => {
-    setStatus("websocket closed, reconnecting");
+    setStatus("websocket closed, reconnecting", "wait");
     configured = false;
+    clearRenderQueue();
     if (decoder) {
       try { decoder.close(); } catch (_) {}
       decoder = undefined;
     }
     setTimeout(connect, 1000);
   };
-  ws.onerror = () => setStatus("websocket error");
+  ws.onerror = () => setStatus("websocket error", "error");
 }
 
 connect();
