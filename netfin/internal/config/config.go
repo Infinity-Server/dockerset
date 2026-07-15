@@ -20,6 +20,7 @@ const (
 	DefaultDebounce          = 2 * time.Second
 	DefaultReconcile         = 30 * time.Minute
 	DefaultSourceRetry       = 5 * time.Second
+	DefaultLogLevel          = "warning"
 	DefaultSQLitePattern     = "*.db"
 	DefaultSQLiteReplicaType = "file"
 )
@@ -35,6 +36,7 @@ type NetfinConfig struct {
 	Debounce          time.Duration `yaml:"debounce"`
 	ReconcileInterval time.Duration `yaml:"reconcile-interval"`
 	SourceRetry       time.Duration `yaml:"source-retry"`
+	LogLevel          string        `yaml:"loglevel"`
 	ExcludePatterns   []string      `yaml:"exclude"`
 	DryRun            bool          `yaml:"dry-run"`
 }
@@ -88,6 +90,7 @@ func Default() Config {
 			Debounce:          DefaultDebounce,
 			ReconcileInterval: DefaultReconcile,
 			SourceRetry:       DefaultSourceRetry,
+			LogLevel:          DefaultLogLevel,
 			ExcludePatterns:   BaseExcludePatterns(),
 		},
 		Litestream: Litestream{
@@ -154,8 +157,17 @@ func (c *Config) applyDefaultsAndValidate() error {
 	if c.Netfin.SourceRetry == 0 {
 		c.Netfin.SourceRetry = DefaultSourceRetry
 	}
+	if c.Netfin.LogLevel == "" {
+		c.Netfin.LogLevel = DefaultLogLevel
+	}
 	if c.Netfin.Debounce < 0 || c.Netfin.ReconcileInterval < 0 || c.Netfin.SourceRetry < 0 {
 		return fmt.Errorf("durations must be positive")
+	}
+	switch strings.ToLower(c.Netfin.LogLevel) {
+	case "debug", "info", "warn", "warning", "error":
+		c.Netfin.LogLevel = strings.ToLower(c.Netfin.LogLevel)
+	default:
+		return fmt.Errorf("netfin.loglevel must be one of debug, info, warn, warning, error")
 	}
 	if len(c.Litestream.DBs) == 0 {
 		c.Litestream.DBs = Default().Litestream.DBs

@@ -4,6 +4,7 @@ netfin:
   debounce: 2s
   reconcile-interval: 30m
   source-retry: 5s
+  loglevel: warning
 
 dbs:
   - path: /config/data/jellyfin.db

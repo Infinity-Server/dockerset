@@ -17,6 +17,7 @@ netfin:
   debounce: 3s
   reconcile-interval: 7m
   source-retry: 4s
+  loglevel: info
   exclude:
     - "*.tmp"
 dbs:
@@ -44,6 +45,9 @@ dbs:
 	if cfg.Netfin.SourceRetry != 4*time.Second {
 		t.Fatalf("SourceRetry = %s", cfg.Netfin.SourceRetry)
 	}
+	if cfg.Netfin.LogLevel != "info" {
+		t.Fatalf("LogLevel = %s", cfg.Netfin.LogLevel)
+	}
 	if len(cfg.Litestream.DBs) != 1 {
 		t.Fatalf("db count = %d", len(cfg.Litestream.DBs))
 	}
@@ -55,6 +59,35 @@ dbs:
 	}
 	if !contains(cfg.Netfin.ExcludePatterns, "*.tmp") {
 		t.Fatalf("custom exclude missing: %#v", cfg.Netfin.ExcludePatterns)
+	}
+}
+
+func TestDefaultLogLevelIsWarning(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "netfin.yml")
+	if err := os.WriteFile(path, []byte(`netfin: {}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Netfin.LogLevel != DefaultLogLevel {
+		t.Fatalf("LogLevel = %s", cfg.Netfin.LogLevel)
+	}
+}
+
+func TestInvalidLogLevelFails(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "netfin.yml")
+	if err := os.WriteFile(path, []byte(`
+netfin:
+  loglevel: verbose
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected invalid loglevel to fail")
 	}
 }
 

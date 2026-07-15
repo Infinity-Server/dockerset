@@ -44,7 +44,7 @@ func run(args []string) error {
 		return err
 	}
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slogLevel(cfg.Netfin.LogLevel)}))
 	slog.SetDefault(logger)
 
 	switch command {
@@ -54,6 +54,21 @@ func run(args []string) error {
 		return runRestore(cfg, logger)
 	default:
 		return fmt.Errorf("unhandled command: %s", command)
+	}
+}
+
+func slogLevel(level string) slog.Level {
+	switch level {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn", "warning":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelWarn
 	}
 }
 

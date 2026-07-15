@@ -28,6 +28,7 @@ netfin:
   debounce: 2s
   reconcile-interval: 30m
   source-retry: 5s
+  loglevel: warning
   dry-run: false
   exclude:
     - "*.tmp"
@@ -41,6 +42,9 @@ dbs:
       path: /backup/sqlite
       sync-interval: 1s
 ```
+
+`netfin.loglevel` accepts `debug`, `info`, `warn`, `warning`, or `error`.
+The default is `warning`.
 
 Directory-style Litestream config is supported for sidecar replication:
 
@@ -135,6 +139,7 @@ data:
       debounce: 2s
       reconcile-interval: 30m
       source-retry: 5s
+      loglevel: warning
     dbs:
       - path: /db/jellyfin.db
         replica:
