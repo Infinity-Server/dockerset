@@ -4,7 +4,7 @@ Single-binary Kubernetes sidecar for backing up Jellyfin configuration.
 
 It runs two independent pipelines:
 
-- ordinary files: `fsnotify` plus periodic full reconcile mirrors `netfin.config-dir` into `netfin.file-backup-dir`
+- ordinary files: `fsnotify` plus periodic lightweight reconcile mirrors `netfin.config-dir` into `netfin.file-backup-dir`
 - SQLite: embedded Litestream Go library replicates databases configured in Litestream-style `dbs:` entries
 
 All runtime configuration is YAML. The file keeps Litestream-style top-level
@@ -26,7 +26,7 @@ netfin:
   config-dir: /config
   file-backup-dir: /backup/files
   debounce: 2s
-  reconcile-interval: 5m
+  reconcile-interval: 30m
   source-retry: 5s
   dry-run: false
   exclude:
@@ -83,7 +83,7 @@ The sidecar tolerates Jellyfin starting before or after it:
 
 - if `netfin.config-dir` does not exist yet, file sync waits and retries
 - if a configured SQLite DB does not exist yet, Litestream replication waits and retries
-- full reconcile runs on startup and every `netfin.reconcile-interval` to repair missed file events
+- a startup deep reconcile repairs stale backups; periodic lightweight reconcile repairs missed source events
 - directory-mode DB configs with `watch: true` keep discovering new matching SQLite databases
 
 ## Restore
@@ -133,7 +133,7 @@ data:
       config-dir: /config
       file-backup-dir: /backup/files
       debounce: 2s
-      reconcile-interval: 5m
+      reconcile-interval: 30m
       source-retry: 5s
     dbs:
       - path: /db/jellyfin.db

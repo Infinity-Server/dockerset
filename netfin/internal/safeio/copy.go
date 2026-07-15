@@ -5,9 +5,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 )
 
-func AtomicCopyFile(src, dst string, mode os.FileMode, dryRun bool) error {
+func AtomicCopyFile(src, dst string, mode os.FileMode, modTime time.Time, dryRun bool) error {
 	if dryRun {
 		return nil
 	}
@@ -35,6 +36,10 @@ func AtomicCopyFile(src, dst string, mode os.FileMode, dryRun bool) error {
 		return err
 	}
 	if err := tmp.Chmod(mode.Perm()); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := os.Chtimes(tmpName, modTime, modTime); err != nil {
 		_ = tmp.Close()
 		return err
 	}

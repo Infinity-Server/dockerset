@@ -18,7 +18,7 @@ const (
 	DefaultFileBackupDir     = "/backup/files"
 	DefaultSQLiteBackupDir   = "/backup/sqlite"
 	DefaultDebounce          = 2 * time.Second
-	DefaultReconcile         = 5 * time.Minute
+	DefaultReconcile         = 30 * time.Minute
 	DefaultSourceRetry       = 5 * time.Second
 	DefaultSQLitePattern     = "*.db"
 	DefaultSQLiteReplicaType = "file"

@@ -80,7 +80,7 @@ func restoreFiles(ctx context.Context, backupDir, targetDir string, dryRun bool,
 			return nil
 		}
 		log.Info("restore file", "path", rel, "bytes", info.Size(), "dry_run", dryRun)
-		return safeio.AtomicCopyFile(path, dst, info.Mode(), dryRun)
+		return safeio.AtomicCopyFile(path, dst, info.Mode(), info.ModTime(), dryRun)
 	})
 }
 

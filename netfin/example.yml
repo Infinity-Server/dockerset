@@ -2,7 +2,7 @@ netfin:
   config-dir: /config/data
   file-backup-dir: /nfs/files
   debounce: 2s
-  reconcile-interval: 5m
+  reconcile-interval: 30m
   source-retry: 5s
 
 dbs:
