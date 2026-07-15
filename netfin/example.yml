@@ -1,0 +1,15 @@
+netfin:
+  config-dir: /config/data
+  file-backup-dir: /nfs/files
+  debounce: 2s
+  reconcile-interval: 5m
+  source-retry: 5s
+
+dbs:
+  - path: /config/data/jellyfin.db
+    monitor-interval: 1s
+    checkpoint-interval: 5s
+    replica:
+      type: file
+      path: /nfs/sqlite
+      sync-interval: 1s
